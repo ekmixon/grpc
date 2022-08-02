@@ -34,10 +34,9 @@ class DemoServer(demo_pb2_grpc.GRPCDemoServicer):
     def SimpleMethod(self, request, context):
         print("SimpleMethod called by client(%d) the message: %s" %
               (request.client_id, request.request_data))
-        response = demo_pb2.Response(
-            server_id=SERVER_ID,
-            response_data="Python server SimpleMethod Ok!!!!")
-        return response
+        return demo_pb2.Response(
+            server_id=SERVER_ID, response_data="Python server SimpleMethod Ok!!!!"
+        )
 
     # 客户端流模式（在一次调用中, 客户端可以多次向服务器传输数据, 但是服务器只能返回一次响应）
     # stream-unary (In a single call, the client can transfer data to the server several times,
@@ -47,10 +46,10 @@ class DemoServer(demo_pb2_grpc.GRPCDemoServicer):
         for request in request_iterator:
             print("recv from client(%d), message= %s" %
                   (request.client_id, request.request_data))
-        response = demo_pb2.Response(
+        return demo_pb2.Response(
             server_id=SERVER_ID,
-            response_data="Python server ClientStreamingMethod ok")
-        return response
+            response_data="Python server ClientStreamingMethod ok",
+        )
 
     # 服务端流模式（在一次调用中, 客户端只能一次向服务器传输数据, 但是服务器可以多次返回响应）
     # unary-stream (In a single call, the client can only transmit data to the server at one time,

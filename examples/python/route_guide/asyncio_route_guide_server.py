@@ -28,10 +28,9 @@ import route_guide_resources
 def get_feature(feature_db: Iterable[route_guide_pb2.Feature],
                 point: route_guide_pb2.Point) -> route_guide_pb2.Feature:
     """Returns Feature at given location or None."""
-    for feature in feature_db:
-        if feature.location == point:
-            return feature
-    return None
+    return next(
+        (feature for feature in feature_db if feature.location == point), None
+    )
 
 
 def get_distance(start: route_guide_pb2.Point,

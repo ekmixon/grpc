@@ -40,9 +40,7 @@ class Metadata(abc.Mapping):
 
     @classmethod
     def from_tuple(cls, raw_metadata: tuple):
-        if raw_metadata:
-            return cls(*raw_metadata)
-        return cls()
+        return cls(*raw_metadata) if raw_metadata else cls()
 
     def add(self, key: MetadataKey, value: MetadataValue) -> None:
         self._metadata.setdefault(key, [])
@@ -75,10 +73,10 @@ class Metadata(abc.Mapping):
 
     def __delitem__(self, key: MetadataKey) -> None:
         """``del metadata[<key>]`` deletes the first mapping for <key>."""
-        current_values = self.get_all(key)
-        if not current_values:
+        if current_values := self.get_all(key):
+            self._metadata[key] = current_values[1:]
+        else:
             raise KeyError(repr(key))
-        self._metadata[key] = current_values[1:]
 
     def delete_all(self, key: MetadataKey) -> None:
         """Delete all mappings for <key>."""
@@ -104,9 +102,7 @@ class Metadata(abc.Mapping):
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, self.__class__):
             return self._metadata == other._metadata
-        if isinstance(other, tuple):
-            return tuple(self) == other
-        return NotImplemented  # pytype: disable=bad-return-type
+        return tuple(self) == other if isinstance(other, tuple) else NotImplemented
 
     def __add__(self, other: Any) -> 'Metadata':
         if isinstance(other, self.__class__):

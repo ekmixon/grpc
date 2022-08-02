@@ -69,11 +69,11 @@ for file_name in sys.argv[1:]:
 
     def indentation_of(line):
         match = re.search(comment_regex, line)
-        return match.group(1)
+        return match[1]
 
     def content(line):
         match = re.search(comment_regex, line)
-        return match.group(2)
+        return match[2]
 
     def format_as_block(comment_block):
         if len(comment_block) == 0:
@@ -82,10 +82,12 @@ for file_name in sys.argv[1:]:
         indent = indentation_of(comment_block[0])
 
         if len(comment_block) == 1:
-            return [indent + "/** " + content(comment_block[0]) + " */\n"]
+            return [f"{indent}/** {content(comment_block[0])}" + " */\n"]
 
-        block = ["/**"] + [" * " + content(line) for line in comment_block
-                          ] + [" */"]
+        block = (["/**"] + [f" * {content(line)}" for line in comment_block]) + [
+            " */"
+        ]
+
         return [indent + line.rstrip() + "\n" for line in block]
 
     # Main algorithm

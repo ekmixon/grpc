@@ -13,6 +13,7 @@
 # limitations under the License.
 """Provides distutils command classes for the gRPC Python setup process."""
 
+
 from distutils import errors as _errors
 import glob
 import os
@@ -30,7 +31,7 @@ from setuptools.command import install
 from setuptools.command import test
 
 PYTHON_STEM = os.path.dirname(os.path.abspath(__file__))
-GRPC_STEM = os.path.abspath(PYTHON_STEM + '../../../../')
+GRPC_STEM = os.path.abspath(f'{PYTHON_STEM}../../../../')
 GRPC_PROTO_STEM = os.path.join(GRPC_STEM, 'src', 'proto')
 PROTO_STEM = os.path.join(PYTHON_STEM, 'src', 'proto')
 PYTHON_PROTO_TOP_LEVEL = os.path.join(PYTHON_STEM, 'src')

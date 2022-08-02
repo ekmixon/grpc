@@ -64,8 +64,7 @@ def create_client_channel(addr):
         channel_credential,
         call_credentials,
     )
-    channel = grpc.secure_channel(addr, composite_credentials)
-    yield channel
+    yield grpc.secure_channel(addr, composite_credentials)
 
 
 def send_rpc(channel):

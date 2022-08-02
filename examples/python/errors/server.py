@@ -31,12 +31,16 @@ from examples.protos import helloworld_pb2_grpc
 def create_greet_limit_exceed_error_status(name):
     detail = any_pb2.Any()
     detail.Pack(
-        error_details_pb2.QuotaFailure(violations=[
-            error_details_pb2.QuotaFailure.Violation(
-                subject="name: %s" % name,
-                description="Limit one greeting per person",
-            )
-        ],))
+        error_details_pb2.QuotaFailure(
+            violations=[
+                error_details_pb2.QuotaFailure.Violation(
+                    subject=f"name: {name}",
+                    description="Limit one greeting per person",
+                )
+            ]
+        )
+    )
+
     return status_pb2.Status(
         code=code_pb2.RESOURCE_EXHAUSTED,
         message='Request limit exceeded.',
@@ -58,7 +62,7 @@ class LimitedGreeter(helloworld_pb2_grpc.GreeterServicer):
                 context.abort_with_status(rpc_status.to_status(rich_status))
             else:
                 self._greeted.add(request.name)
-        return helloworld_pb2.HelloReply(message='Hello, %s!' % request.name)
+        return helloworld_pb2.HelloReply(message=f'Hello, {request.name}!')
 
 
 def create_server(server_address):

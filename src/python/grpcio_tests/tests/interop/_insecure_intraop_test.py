@@ -37,7 +37,8 @@ class InsecureIntraopTest(_intraop_test_case.IntraopTestCase,
         port = self.server.add_insecure_port('[::]:0')
         self.server.start()
         self.stub = test_pb2_grpc.TestServiceStub(
-            grpc.insecure_channel('localhost:{}'.format(port)))
+            grpc.insecure_channel(f'localhost:{port}')
+        )
 
     def tearDown(self):
         self.server.stop(None)

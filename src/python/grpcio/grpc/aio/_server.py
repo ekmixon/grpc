@@ -43,11 +43,11 @@ class Server(_base_server.Server):
                  compression: Optional[grpc.Compression]):
         self._loop = cygrpc.get_working_loop()
         if interceptors:
-            invalid_interceptors = [
-                interceptor for interceptor in interceptors
+            if invalid_interceptors := [
+                interceptor
+                for interceptor in interceptors
                 if not isinstance(interceptor, ServerInterceptor)
-            ]
-            if invalid_interceptors:
+            ]:
                 raise ValueError(
                     'Interceptor must be ServerInterceptor, the '
                     f'following are invalid: {invalid_interceptors}')
@@ -165,12 +165,11 @@ class Server(_base_server.Server):
         The Cython AioServer doesn't hold a ref-count to this class. It should
         be safe to slightly extend the underlying Cython object's life span.
         """
-        if hasattr(self, '_server'):
-            if self._server.is_running():
-                cygrpc.schedule_coro_threadsafe(
-                    self._server.shutdown(None),
-                    self._loop,
-                )
+        if hasattr(self, '_server') and self._server.is_running():
+            cygrpc.schedule_coro_threadsafe(
+                self._server.shutdown(None),
+                self._loop,
+            )
 
 
 def server(migration_thread_pool: Optional[Executor] = None,

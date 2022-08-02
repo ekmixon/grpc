@@ -369,45 +369,33 @@ END2END_TESTS = {
 }
 
 def _compatible(fopt, topt):
-    if topt.needs_fullstack:
-        if not fopt.fullstack:
-            return False
-    if topt.needs_dns:
-        if not fopt.dns_resolver:
-            return False
-    if topt.needs_names:
-        if not fopt.name_resolution:
-            return False
-    if not topt.proxyable:
-        if fopt.includes_proxy:
-            return False
-    if not topt.traceable:
-        if fopt.tracing:
-            return False
-    if topt.exclude_inproc:
-        if fopt.is_inproc:
-            return False
-    if topt.needs_http2:
-        if not fopt.is_http2:
-            return False
-    if topt.needs_proxy_auth:
-        if not fopt.supports_proxy_auth:
-            return False
-    if topt.needs_write_buffering:
-        if not fopt.supports_write_buffering:
-            return False
-    if topt.needs_client_channel:
-        if not fopt.client_channel:
-            return False
-    return True
+    if topt.needs_fullstack and not fopt.fullstack:
+        return False
+    if topt.needs_dns and not fopt.dns_resolver:
+        return False
+    if topt.needs_names and not fopt.name_resolution:
+        return False
+    if not topt.proxyable and fopt.includes_proxy:
+        return False
+    if not topt.traceable and fopt.tracing:
+        return False
+    if topt.exclude_inproc and fopt.is_inproc:
+        return False
+    if topt.needs_http2 and not fopt.is_http2:
+        return False
+    if topt.needs_proxy_auth and not fopt.supports_proxy_auth:
+        return False
+    if topt.needs_write_buffering and not fopt.supports_write_buffering:
+        return False
+    return bool(not topt.needs_client_channel or fopt.client_channel)
 
 def _platform_support_tags(fopt):
     result = []
-    if not "windows" in fopt._platforms:
+    if "windows" not in fopt._platforms:
         result.append("no_windows")
-    if not "mac" in fopt._platforms:
+    if "mac" not in fopt._platforms:
         result.append("no_mac")
-    if not "linux" in fopt._platforms:
+    if "linux" not in fopt._platforms:
         result.append("no_linux")
     return result
 
@@ -415,18 +403,18 @@ def _platform_support_tags(fopt):
 def grpc_end2end_tests():
     """Instantiates the gRPC end2end tests."""
     grpc_cc_library(
-        name = "end2end_tests",
-        srcs = ["end2end_tests.cc", "end2end_test_utils.cc"] + [
-            "tests/%s.cc" % t
-            for t in sorted(END2END_TESTS.keys())
-        ],
-        hdrs = [
+        name="end2end_tests",
+        srcs=(
+            ["end2end_tests.cc", "end2end_test_utils.cc"]
+            + [f"tests/{t}.cc" for t in sorted(END2END_TESTS.keys())]
+        ),
+        hdrs=[
             "tests/cancel_test_helpers.h",
             "end2end_tests.h",
         ],
-        language = "C++",
-        testonly = 1,
-        deps = [
+        language="C++",
+        testonly=1,
+        deps=[
             ":cq_verifier",
             ":ssl_test_data",
             ":http_proxy",
@@ -437,77 +425,76 @@ def grpc_end2end_tests():
         ],
     )
 
+
     for f, fopt in END2END_FIXTURES.items():
         grpc_cc_binary(
-            name = "%s_test" % f,
-            srcs = ["fixtures/%s.cc" % f],
-            language = "C++",
-            testonly = 1,
-            data = [
+            name=f"{f}_test",
+            srcs=[f"fixtures/{f}.cc"],
+            language="C++",
+            testonly=1,
+            data=[
                 "//src/core/tsi/test_creds:ca.pem",
                 "//src/core/tsi/test_creds:server1.key",
                 "//src/core/tsi/test_creds:server1.pem",
             ],
-            deps = [
+            deps=[
                 ":end2end_tests",
                 "//test/core/util:grpc_test_util",
                 "//:grpc",
                 "//:gpr",
             ],
-            tags = _platform_support_tags(fopt),
+            tags=_platform_support_tags(fopt),
         )
+
 
         for t, topt in END2END_TESTS.items():
             #print(_compatible(fopt, topt), f, t, fopt, topt)
             if not _compatible(fopt, topt):
                 continue
 
-            test_short_name = str(t) if not topt.short_name else topt.short_name
+            test_short_name = topt.short_name or str(t)
             native.sh_test(
-                name = "%s_test@%s" % (f, test_short_name),
-                data = [":%s_test" % f],
-                srcs = ["end2end_test.sh"],
-                args = [
-                    "$(location %s_test)" % f,
-                    t,
-                ],
-                tags = ["no_linux"] + _platform_support_tags(fopt),
-                flaky = t in fopt.flaky_tests,
+                name=f"{f}_test@{test_short_name}",
+                data=[f":{f}_test"],
+                srcs=["end2end_test.sh"],
+                args=[f"$(location {f}_test)", t],
+                tags=["no_linux"] + _platform_support_tags(fopt),
+                flaky=t in fopt.flaky_tests,
             )
+
 
             for poller in POLLERS:
                 if poller in topt.exclude_pollers:
                     continue
                 native.sh_test(
-                    name = "%s_test@%s@poller=%s" % (f, test_short_name, poller),
-                    data = [":%s_test" % f],
-                    srcs = ["end2end_test.sh"],
-                    args = [
-                        "$(location %s_test)" % f,
-                        t,
-                        poller,
-                    ],
-                    tags = ["no_mac", "no_windows"],
-                    flaky = t in fopt.flaky_tests,
+                    name=f"{f}_test@{test_short_name}@poller={poller}",
+                    data=[f":{f}_test"],
+                    srcs=["end2end_test.sh"],
+                    args=[f"$(location {f}_test)", t, poller],
+                    tags=["no_mac", "no_windows"],
+                    flaky=t in fopt.flaky_tests,
                 )
 
 # buildifier: disable=unnamed-macro
 def grpc_end2end_nosec_tests():
     """Instantiates the gRPC end2end no security tests"""
     grpc_cc_library(
-        name = "end2end_nosec_tests",
-        srcs = ["end2end_nosec_tests.cc", "end2end_test_utils.cc"] + [
-            "tests/%s.cc" % t
-            for t in sorted(END2END_TESTS.keys())
-            if not END2END_TESTS[t].secure
-        ],
-        hdrs = [
+        name="end2end_nosec_tests",
+        srcs=(
+            ["end2end_nosec_tests.cc", "end2end_test_utils.cc"]
+            + [
+                f"tests/{t}.cc"
+                for t in sorted(END2END_TESTS.keys())
+                if not END2END_TESTS[t].secure
+            ]
+        ),
+        hdrs=[
             "tests/cancel_test_helpers.h",
             "end2end_tests.h",
         ],
-        language = "C++",
-        testonly = 1,
-        deps = [
+        language="C++",
+        testonly=1,
+        deps=[
             ":cq_verifier",
             ":ssl_test_data",
             ":http_proxy",
@@ -517,27 +504,29 @@ def grpc_end2end_nosec_tests():
         ],
     )
 
+
     for f, fopt in END2END_NOSEC_FIXTURES.items():
         if fopt.secure:
             continue
         grpc_cc_binary(
-            name = "%s_nosec_test" % f,
-            srcs = ["fixtures/%s.cc" % f],
-            language = "C++",
-            testonly = 1,
-            data = [
+            name=f"{f}_nosec_test",
+            srcs=[f"fixtures/{f}.cc"],
+            language="C++",
+            testonly=1,
+            data=[
                 "//src/core/tsi/test_creds:ca.pem",
                 "//src/core/tsi/test_creds:server1.key",
                 "//src/core/tsi/test_creds:server1.pem",
             ],
-            deps = [
+            deps=[
                 ":end2end_nosec_tests",
                 "//test/core/util:grpc_test_util_unsecure",
                 "//:grpc_unsecure",
                 "//:gpr",
             ],
-            tags = _platform_support_tags(fopt),
+            tags=_platform_support_tags(fopt),
         )
+
         for t, topt in END2END_TESTS.items():
             #print(_compatible(fopt, topt), f, t, fopt, topt)
             if not _compatible(fopt, topt):
@@ -545,31 +534,25 @@ def grpc_end2end_nosec_tests():
             if topt.secure:
                 continue
 
-            test_short_name = str(t) if not topt.short_name else topt.short_name
+            test_short_name = topt.short_name or str(t)
             native.sh_test(
-                name = "%s_nosec_test@%s" % (f, test_short_name),
-                data = [":%s_nosec_test" % f],
-                srcs = ["end2end_test.sh"],
-                args = [
-                    "$(location %s_nosec_test)" % f,
-                    t,
-                ],
-                tags = ["no_linux"] + _platform_support_tags(fopt),
-                flaky = t in fopt.flaky_tests,
+                name=f"{f}_nosec_test@{test_short_name}",
+                data=[f":{f}_nosec_test"],
+                srcs=["end2end_test.sh"],
+                args=[f"$(location {f}_nosec_test)", t],
+                tags=["no_linux"] + _platform_support_tags(fopt),
+                flaky=t in fopt.flaky_tests,
             )
+
 
             for poller in POLLERS:
                 if poller in topt.exclude_pollers:
                     continue
                 native.sh_test(
-                    name = "%s_nosec_test@%s@poller=%s" % (f, test_short_name, poller),
-                    data = [":%s_nosec_test" % f],
-                    srcs = ["end2end_test.sh"],
-                    args = [
-                        "$(location %s_nosec_test)" % f,
-                        t,
-                        poller,
-                    ],
-                    tags = ["no_mac", "no_windows"],
-                    flaky = t in fopt.flaky_tests,
+                    name=f"{f}_nosec_test@{test_short_name}@poller={poller}",
+                    data=[f":{f}_nosec_test"],
+                    srcs=["end2end_test.sh"],
+                    args=[f"$(location {f}_nosec_test)", t, poller],
+                    tags=["no_mac", "no_windows"],
+                    flaky=t in fopt.flaky_tests,
                 )

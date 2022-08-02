@@ -19,6 +19,7 @@ This example parses message and service schemas directly from a
 Several APIs used in this example are in an experimental state.
 """
 
+
 from __future__ import print_function
 
 import logging
@@ -38,4 +39,4 @@ logging.basicConfig()
 response = services.Greeter.SayHello(protos.HelloRequest(name='you'),
                                      'localhost:50051',
                                      insecure=True)
-print("Greeter client received: " + response.message)
+print(f"Greeter client received: {response.message}")

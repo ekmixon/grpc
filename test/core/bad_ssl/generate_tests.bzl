@@ -40,25 +40,26 @@ def grpc_bad_ssl_tests():
     )
     for t in BAD_SSL_TESTS:
         grpc_cc_binary(
-            name = "bad_ssl_%s_server" % t,
-            srcs = ["servers/%s.cc" % t],
-            deps = [":bad_ssl_test_server"],
+            name=f"bad_ssl_{t}_server",
+            srcs=[f"servers/{t}.cc"],
+            deps=[":bad_ssl_test_server"],
         )
+
         grpc_cc_test(
-            name = "bad_ssl_%s_test" % t,
-            srcs = ["bad_ssl_test.cc"],
-            data = [
-                ":bad_ssl_%s_server" % t,
+            name=f"bad_ssl_{t}_test",
+            srcs=["bad_ssl_test.cc"],
+            data=[
+                f":bad_ssl_{t}_server",
                 "//src/core/tsi/test_creds:badserver.key",
                 "//src/core/tsi/test_creds:badserver.pem",
                 "//src/core/tsi/test_creds:ca.pem",
                 "//src/core/tsi/test_creds:server1.key",
                 "//src/core/tsi/test_creds:server1.pem",
             ],
-            deps = [
+            deps=[
                 "//test/core/util:grpc_test_util",
                 "//:gpr",
                 "//test/core/end2end:cq_verifier",
             ],
-            tags = ["no_windows"],
+            tags=["no_windows"],
         )

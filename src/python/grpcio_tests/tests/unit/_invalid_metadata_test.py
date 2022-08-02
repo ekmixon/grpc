@@ -66,7 +66,7 @@ class InvalidMetadataTest(unittest.TestCase):
     def testUnaryRequestBlockingUnaryResponse(self):
         request = b'\x07\x08'
         metadata = (('InVaLiD', 'UnaryRequestBlockingUnaryResponse'),)
-        expected_error_details = "metadata was invalid: %s" % metadata
+        expected_error_details = f"metadata was invalid: {metadata}"
         with self.assertRaises(ValueError) as exception_context:
             self._unary_unary(request, metadata=metadata)
         self.assertIn(expected_error_details, str(exception_context.exception))
@@ -74,7 +74,7 @@ class InvalidMetadataTest(unittest.TestCase):
     def testUnaryRequestBlockingUnaryResponseWithCall(self):
         request = b'\x07\x08'
         metadata = (('InVaLiD', 'UnaryRequestBlockingUnaryResponseWithCall'),)
-        expected_error_details = "metadata was invalid: %s" % metadata
+        expected_error_details = f"metadata was invalid: {metadata}"
         with self.assertRaises(ValueError) as exception_context:
             self._unary_unary.with_call(request, metadata=metadata)
         self.assertIn(expected_error_details, str(exception_context.exception))
@@ -82,14 +82,14 @@ class InvalidMetadataTest(unittest.TestCase):
     def testUnaryRequestFutureUnaryResponse(self):
         request = b'\x07\x08'
         metadata = (('InVaLiD', 'UnaryRequestFutureUnaryResponse'),)
-        expected_error_details = "metadata was invalid: %s" % metadata
+        expected_error_details = f"metadata was invalid: {metadata}"
         with self.assertRaises(ValueError) as exception_context:
             self._unary_unary.future(request, metadata=metadata)
 
     def testUnaryRequestStreamResponse(self):
         request = b'\x37\x58'
         metadata = (('InVaLiD', 'UnaryRequestStreamResponse'),)
-        expected_error_details = "metadata was invalid: %s" % metadata
+        expected_error_details = f"metadata was invalid: {metadata}"
         with self.assertRaises(ValueError) as exception_context:
             self._unary_stream(request, metadata=metadata)
         self.assertIn(expected_error_details, str(exception_context.exception))
@@ -98,7 +98,7 @@ class InvalidMetadataTest(unittest.TestCase):
         request_iterator = (
             b'\x07\x08' for _ in range(test_constants.STREAM_LENGTH))
         metadata = (('InVaLiD', 'StreamRequestBlockingUnaryResponse'),)
-        expected_error_details = "metadata was invalid: %s" % metadata
+        expected_error_details = f"metadata was invalid: {metadata}"
         with self.assertRaises(ValueError) as exception_context:
             self._stream_unary(request_iterator, metadata=metadata)
         self.assertIn(expected_error_details, str(exception_context.exception))
@@ -107,7 +107,7 @@ class InvalidMetadataTest(unittest.TestCase):
         request_iterator = (
             b'\x07\x08' for _ in range(test_constants.STREAM_LENGTH))
         metadata = (('InVaLiD', 'StreamRequestBlockingUnaryResponseWithCall'),)
-        expected_error_details = "metadata was invalid: %s" % metadata
+        expected_error_details = f"metadata was invalid: {metadata}"
         multi_callable = _stream_unary_multi_callable(self._channel)
         with self.assertRaises(ValueError) as exception_context:
             multi_callable.with_call(request_iterator, metadata=metadata)
@@ -117,7 +117,7 @@ class InvalidMetadataTest(unittest.TestCase):
         request_iterator = (
             b'\x07\x08' for _ in range(test_constants.STREAM_LENGTH))
         metadata = (('InVaLiD', 'StreamRequestFutureUnaryResponse'),)
-        expected_error_details = "metadata was invalid: %s" % metadata
+        expected_error_details = f"metadata was invalid: {metadata}"
         with self.assertRaises(ValueError) as exception_context:
             self._stream_unary.future(request_iterator, metadata=metadata)
         self.assertIn(expected_error_details, str(exception_context.exception))
@@ -126,7 +126,7 @@ class InvalidMetadataTest(unittest.TestCase):
         request_iterator = (
             b'\x07\x08' for _ in range(test_constants.STREAM_LENGTH))
         metadata = (('InVaLiD', 'StreamRequestStreamResponse'),)
-        expected_error_details = "metadata was invalid: %s" % metadata
+        expected_error_details = f"metadata was invalid: {metadata}"
         with self.assertRaises(ValueError) as exception_context:
             self._stream_stream(request_iterator, metadata=metadata)
         self.assertIn(expected_error_details, str(exception_context.exception))

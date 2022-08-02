@@ -29,12 +29,6 @@ def sys_path_to_site_dir_hack():
     # Only run within our Bazel environment
     if not os.environ.get(_GRPC_BAZEL_RUNTIME_ENV):
         return
-    items = []
-    for item in sys.path:
-        if os.path.exists(item):
-            # The only difference between sys.path and site-directory is
-            # whether the .pth file will be parsed or not. A site-directory
-            # will always exist in sys.path, but not another way around.
-            items.append(item)
+    items = [item for item in sys.path if os.path.exists(item)]
     for item in items:
         site.addsitedir(item)

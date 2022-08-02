@@ -56,31 +56,31 @@ class _ChannelReadyFuture(future.Future):
 
     def _update(self, connectivity):
         with self._condition:
-            if (not self._cancelled and
-                    connectivity is interfaces.ChannelConnectivity.READY):
-                self._matured = True
-                self._channel.unsubscribe(self._update)
-                self._condition.notify_all()
-                done_callbacks = tuple(self._done_callbacks)
-                self._done_callbacks = None
-            else:
+            if (
+                self._cancelled
+                or connectivity is not interfaces.ChannelConnectivity.READY
+            ):
                 return
 
+            self._matured = True
+            self._channel.unsubscribe(self._update)
+            self._condition.notify_all()
+            done_callbacks = tuple(self._done_callbacks)
+            self._done_callbacks = None
         for done_callback in done_callbacks:
             callable_util.call_logging_exceptions(
                 done_callback, _DONE_CALLBACK_EXCEPTION_LOG_MESSAGE, self)
 
     def cancel(self):
         with self._condition:
-            if not self._matured:
-                self._cancelled = True
-                self._channel.unsubscribe(self._update)
-                self._condition.notify_all()
-                done_callbacks = tuple(self._done_callbacks)
-                self._done_callbacks = None
-            else:
+            if self._matured:
                 return False
 
+            self._cancelled = True
+            self._channel.unsubscribe(self._update)
+            self._condition.notify_all()
+            done_callbacks = tuple(self._done_callbacks)
+            self._done_callbacks = None
         for done_callback in done_callbacks:
             callable_util.call_logging_exceptions(
                 done_callback, _DONE_CALLBACK_EXCEPTION_LOG_MESSAGE, self)

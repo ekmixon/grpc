@@ -39,11 +39,7 @@ _THREAD_CONCURRENCY = _PROCESS_COUNT
 
 
 def is_prime(n):
-    for i in range(2, int(math.ceil(math.sqrt(n)))):
-        if n % i == 0:
-            return False
-    else:
-        return True
+    return all(n % i != 0 for i in range(2, int(math.ceil(math.sqrt(n)))))
 
 
 class PrimeChecker(prime_pb2_grpc.PrimeCheckerServicer):
@@ -91,7 +87,7 @@ def _reserve_port():
 
 def main():
     with _reserve_port() as port:
-        bind_address = 'localhost:{}'.format(port)
+        bind_address = f'localhost:{port}'
         _LOGGER.info("Binding to '%s'", bind_address)
         sys.stdout.flush()
         workers = []

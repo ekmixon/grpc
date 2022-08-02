@@ -36,7 +36,7 @@ def run():
                                                    default_value_interceptor)
         stub = helloworld_pb2_grpc.GreeterStub(intercept_channel)
         response = stub.SayHello(helloworld_pb2.HelloRequest(name='you'))
-    print("Greeter client received: " + response.message)
+    print(f"Greeter client received: {response.message}")
 
 
 if __name__ == '__main__':

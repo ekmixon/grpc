@@ -169,8 +169,7 @@ class _SyncStream(object):
     def _request_generator(self):
         while self._is_streaming:
             try:
-                request = self._request_queue.get(block=True, timeout=1.0)
-                yield request
+                yield self._request_queue.get(block=True, timeout=1.0)
             except queue.Empty:
                 pass
 

@@ -43,14 +43,11 @@ class TestConsumer(stream.Consumer):
         """Reports whether or not a legal sequence of calls has been made."""
         terminated = False
         for value, terminal in self.calls:
-            if terminated:
+            if terminated or not terminal and value is None:
                 return False
             elif terminal:
                 terminated = True
-            elif value is None:
-                return False
-        else:  # pylint: disable=useless-else-on-loop
-            return True
+        return True
 
     def values(self):
         """Returns the sequence of values that have been passed to this Consumer."""

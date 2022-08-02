@@ -31,4 +31,4 @@ streams = {
 }
 
 for name, stream in streams.items():
-    open('client_fuzzer_corpus/%s' % name, 'w').write(bytearray(stream))
+    open(f'client_fuzzer_corpus/{name}', 'w').write(bytearray(stream))

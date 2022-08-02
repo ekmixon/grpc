@@ -82,15 +82,15 @@ class TestLeak(unittest.TestCase):
         before = _get_max_rss()
 
         # Amplifies the leak.
-        for n in range(_LARGE_NUM_OF_ITERATIONS):
+        for _ in range(_LARGE_NUM_OF_ITERATIONS):
             _perform_an_rpc(address)
 
         # Fails the test if memory leak detected.
         diff = _get_max_rss() - before
         if diff > _FAIL_THRESHOLD:
-            self.fail("Max RSS inflated {} > {}".format(
-                _pretty_print_bytes(diff),
-                _pretty_print_bytes(_FAIL_THRESHOLD)))
+            self.fail(
+                f"Max RSS inflated {_pretty_print_bytes(diff)} > {_pretty_print_bytes(_FAIL_THRESHOLD)}"
+            )
 
 
 if __name__ == "__main__":

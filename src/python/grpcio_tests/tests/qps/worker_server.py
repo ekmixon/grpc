@@ -89,8 +89,7 @@ class WorkerServer(worker_service_pb2_grpc.WorkerServiceServicer):
                 'grpc.testing.BenchmarkService', method_implementations)
             server.add_generic_rpc_handlers((handler,))
         else:
-            raise Exception('Unsupported server type {}'.format(
-                config.server_type))
+            raise Exception(f'Unsupported server type {config.server_type}')
 
         if self._server_port is not None and config.port == 0:
             server_port = self._server_port
@@ -100,10 +99,9 @@ class WorkerServer(worker_service_pb2_grpc.WorkerServiceServicer):
         if config.HasField('security_params'):  # Use SSL
             server_creds = grpc.ssl_server_credentials(
                 ((resources.private_key(), resources.certificate_chain()),))
-            port = server.add_secure_port('[::]:{}'.format(server_port),
-                                          server_creds)
+            port = server.add_secure_port(f'[::]:{server_port}', server_creds)
         else:
-            port = server.add_insecure_port('[::]:{}'.format(server_port))
+            port = server.add_insecure_port(f'[::]:{server_port}')
 
         return (server, port)
 

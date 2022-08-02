@@ -83,10 +83,7 @@ class ForkInteropTest(unittest.TestCase):
             timer.start()
             while True:
                 streams[0].seek(0)
-                s = streams[0].readline()
-                if not s:
-                    continue
-                else:
+                if s := streams[0].readline():
                     self._port = int(s)
                     break
         except ValueError:

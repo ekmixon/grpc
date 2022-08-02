@@ -46,12 +46,11 @@ def parse_interop_server_arguments():
 
 
 def get_server_credentials(use_tls):
-    if use_tls:
-        private_key = resources.private_key()
-        certificate_chain = resources.certificate_chain()
-        return grpc.ssl_server_credentials(((private_key, certificate_chain),))
-    else:
+    if not use_tls:
         return grpc.alts_server_credentials()
+    private_key = resources.private_key()
+    certificate_chain = resources.certificate_chain()
+    return grpc.ssl_server_credentials(((private_key, certificate_chain),))
 
 
 def serve():
@@ -62,9 +61,9 @@ def serve():
                                                     server)
     if args.use_tls or args.use_alts:
         credentials = get_server_credentials(args.use_tls)
-        server.add_secure_port('[::]:{}'.format(args.port), credentials)
+        server.add_secure_port(f'[::]:{args.port}', credentials)
     else:
-        server.add_insecure_port('[::]:{}'.format(args.port))
+        server.add_insecure_port(f'[::]:{args.port}')
 
     server.start()
     _LOGGER.info('Server serving.')

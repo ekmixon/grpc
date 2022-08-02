@@ -66,7 +66,6 @@ class _Servicer(object):
             self._serviced = True
             self._condition.notify_all()
             return
-            yield  # pylint: disable=unreachable
 
     def stream_unary(self, request_iterator, context):
         for request in request_iterator:

@@ -57,7 +57,6 @@ class FirstServiceServicer(services_pb2_grpc.FirstServiceServicer):
             context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
             context.set_details('Something is wrong with your request!')
         return
-        yield services_pb2.Strange()  # pylint: disable=unreachable
 
     def StreUn(self, request_iterator, context):
         context.send_initial_metadata(((
@@ -71,8 +70,7 @@ class FirstServiceServicer(services_pb2_grpc.FirstServiceServicer):
                 return services_pb2.Strange()
             elif not context.is_active():
                 return services_pb2.Strange()
-        else:
-            return _application_common.STREAM_UNARY_RESPONSE
+        return _application_common.STREAM_UNARY_RESPONSE
 
     def StreStre(self, request_iterator, context):
         valid_requests = (_application_common.STREAM_STREAM_REQUEST,

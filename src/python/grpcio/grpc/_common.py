@@ -66,27 +66,21 @@ _ERROR_MESSAGE_PORT_BINDING_FAILED = 'Failed to bind to address %s; set ' \
 
 
 def encode(s):
-    if isinstance(s, bytes):
-        return s
-    else:
-        return s.encode('utf8')
+    return s if isinstance(s, bytes) else s.encode('utf8')
 
 
 def decode(b):
-    if isinstance(b, bytes):
-        return b.decode('utf-8', 'replace')
-    return b
+    return b.decode('utf-8', 'replace') if isinstance(b, bytes) else b
 
 
 def _transform(message, transformer, exception_message):
     if transformer is None:
         return message
-    else:
-        try:
-            return transformer(message)
-        except Exception:  # pylint: disable=broad-except
-            _LOGGER.exception(exception_message)
-            return None
+    try:
+        return transformer(message)
+    except Exception:  # pylint: disable=broad-except
+        _LOGGER.exception(exception_message)
+        return None
 
 
 def serialize(message, serializer):
@@ -99,7 +93,7 @@ def deserialize(serialized_message, deserializer):
 
 
 def fully_qualified_method(group, method):
-    return '/{}/{}'.format(group, method)
+    return f'/{group}/{method}'
 
 
 def _wait_once(wait_fn, timeout, spin_cb):

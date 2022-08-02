@@ -38,7 +38,7 @@ def run():
         # Please refer gRPC Python documents for more detail. https://grpc.io/grpc/python/grpc.html
         response = stub.SayHello(helloworld_pb2.HelloRequest(name='you'),
                                  timeout=10)
-    print("Greeter client received: " + response.message)
+    print(f"Greeter client received: {response.message}")
 
 
 if __name__ == '__main__':

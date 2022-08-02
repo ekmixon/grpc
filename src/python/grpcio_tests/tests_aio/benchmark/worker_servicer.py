@@ -94,16 +94,14 @@ def _create_server(config: control_pb2.ServerConfig) -> Tuple[aio.Server, int]:
             'grpc.testing.BenchmarkService', method_implementations)
         server.add_generic_rpc_handlers((handler,))
     else:
-        raise NotImplementedError('Unsupported server type {}'.format(
-            config.server_type))
+        raise NotImplementedError(f'Unsupported server type {config.server_type}')
 
     if config.HasField('security_params'):  # Use SSL
         server_creds = grpc.ssl_server_credentials(
             ((resources.private_key(), resources.certificate_chain()),))
-        port = server.add_secure_port('[::]:{}'.format(config.port),
-                                      server_creds)
+        port = server.add_secure_port(f'[::]:{config.port}', server_creds)
     else:
-        port = server.add_insecure_port('[::]:{}'.format(config.port))
+        port = server.add_insecure_port(f'[::]:{config.port}')
 
     return server, port
 
@@ -131,20 +129,19 @@ def _create_client(
         raise NotImplementedError(
             f'Unsupported load parameter {config.load_params}')
 
-    if config.client_type == control_pb2.ASYNC_CLIENT:
-        if config.rpc_type == control_pb2.UNARY:
-            client_type = benchmark_client.UnaryAsyncBenchmarkClient
-        elif config.rpc_type == control_pb2.STREAMING:
-            client_type = benchmark_client.StreamingAsyncBenchmarkClient
-        elif config.rpc_type == control_pb2.STREAMING_FROM_SERVER:
-            client_type = benchmark_client.ServerStreamingAsyncBenchmarkClient
-        else:
-            raise NotImplementedError(
-                f'Unsupported rpc_type [{config.rpc_type}]')
-    else:
+    if config.client_type != control_pb2.ASYNC_CLIENT:
         raise NotImplementedError(
             f'Unsupported client type {config.client_type}')
 
+    if config.rpc_type == control_pb2.UNARY:
+        client_type = benchmark_client.UnaryAsyncBenchmarkClient
+    elif config.rpc_type == control_pb2.STREAMING:
+        client_type = benchmark_client.StreamingAsyncBenchmarkClient
+    elif config.rpc_type == control_pb2.STREAMING_FROM_SERVER:
+        client_type = benchmark_client.ServerStreamingAsyncBenchmarkClient
+    else:
+        raise NotImplementedError(
+            f'Unsupported rpc_type [{config.rpc_type}]')
     return client_type(server, config, qps_data)
 
 

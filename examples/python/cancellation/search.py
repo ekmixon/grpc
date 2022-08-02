@@ -31,11 +31,7 @@ _BYTE_MAX = 255
 
 def _get_hamming_distance(a, b):
     """Calculates hamming distance between strings of equal length."""
-    distance = 0
-    for char_a, char_b in zip(a, b):
-        if char_a != char_b:
-            distance += 1
-    return distance
+    return sum(char_a != char_b for char_a, char_b in zip(a, b))
 
 
 def _get_substring_hamming_distance(candidate, target):
@@ -91,9 +87,9 @@ def _all_bytestrings():
     Yields:
       All bytestrings in ascending order of length.
     """
-    for bytestring in itertools.chain.from_iterable(
-            _bytestrings_of_length(length) for length in itertools.count()):
-        yield bytestring
+    yield from itertools.chain.from_iterable(
+        _bytestrings_of_length(length) for length in itertools.count()
+    )
 
 
 def search(target,
@@ -124,8 +120,7 @@ def search(target,
       ResourceLimitExceededError: If the computation exceeds `maximum_hashes`
         iterations.
     """
-    hashes_computed = 0
-    for secret in _all_bytestrings():
+    for hashes_computed, secret in enumerate(_all_bytestrings(), start=1):
         if stop_event.is_set():
             return
         candidate_hash = _get_hash(secret)
@@ -143,6 +138,5 @@ def search(target,
                 hashed_name=candidate_hash,
                 hamming_distance=distance)
             return
-        hashes_computed += 1
         if hashes_computed == maximum_hashes:
             raise ResourceLimitExceededError()

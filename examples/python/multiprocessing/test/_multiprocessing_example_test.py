@@ -29,22 +29,16 @@ _CLIENT_PATH = os.path.join(_BINARY_DIR, 'client')
 
 
 def is_prime(n):
-    for i in range(2, int(math.ceil(math.sqrt(n)))):
-        if n % i == 0:
-            return False
-    else:
-        return True
+    return all(n % i != 0 for i in range(2, int(math.ceil(math.sqrt(n)))))
 
 
 def _get_server_address(server_stream):
     while True:
         server_stream.seek(0)
-        line = server_stream.readline()
-        while line:
+        while line := server_stream.readline():
             matches = re.search('Binding to \'(.+)\'', line)
             if matches is not None:
                 return matches.groups()[0]
-            line = server_stream.readline()
 
 
 class MultiprocessingExampleTest(unittest.TestCase):

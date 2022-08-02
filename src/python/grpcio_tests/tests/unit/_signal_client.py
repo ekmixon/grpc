@@ -68,8 +68,6 @@ def main_streaming(server_target):
         signal.signal(signal.SIGINT, handle_sigint)
         per_process_rpc_future = channel.unary_stream(UNARY_STREAM)(
             _MESSAGE, wait_for_ready=True)
-        for result in per_process_rpc_future:
-            pass
         assert False, _ASSERTION_MESSAGE
 
 
@@ -113,7 +111,7 @@ if __name__ == '__main__':
         main_unary(args.server)
     elif args.arity == 'streaming' and not args.exception:
         main_streaming(args.server)
-    elif args.arity == 'unary' and args.exception:
+    elif args.arity == 'unary':
         main_unary_with_exception(args.server)
     else:
         main_streaming_with_exception(args.server)

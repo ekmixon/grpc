@@ -31,7 +31,7 @@ _classic_spawn = ccompiler.CCompiler.spawn
 
 
 def _commandfile_spawn(self, command):
-    command_length = sum([len(arg) for arg in command])
+    command_length = sum(len(arg) for arg in command)
     if os.name == 'nt' and command_length > MAX_COMMAND_LENGTH:
         # Even if this command doesn't support the @command_file, it will
         # fail as is so we try blindly
@@ -45,7 +45,7 @@ def _commandfile_spawn(self, command):
                 '"' + arg.replace('\\', '\\\\') + '"' for arg in command[1:]
             ]
             command_file.write(' '.join(escaped_args))
-        modified_command = command[:1] + ['@{}'.format(command_filename)]
+        modified_command = command[:1] + [f'@{command_filename}']
         try:
             _classic_spawn(self, modified_command)
         finally:

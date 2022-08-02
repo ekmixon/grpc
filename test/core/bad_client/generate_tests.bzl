@@ -48,10 +48,10 @@ def grpc_bad_client_tests():
     )
     for t, topt in BAD_CLIENT_TESTS.items():
         grpc_cc_test(
-            name = "%s_bad_client_test" % t,
-            srcs = ["tests/%s.cc" % t],
-            deps = [":bad_client_test"],
-            external_deps = [
+            name=f"{t}_bad_client_test",
+            srcs=[f"tests/{t}.cc"],
+            deps=[":bad_client_test"],
+            external_deps=[
                 "gtest",
             ],
         )

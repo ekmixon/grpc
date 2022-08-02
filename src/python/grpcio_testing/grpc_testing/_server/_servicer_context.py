@@ -27,13 +27,12 @@ class ServicerContext(grpc.ServicerContext):
         return self._rpc.is_active()
 
     def time_remaining(self):
-        if self._rpc.is_active():
-            if self._deadline is None:
-                return None
-            else:
-                return max(0.0, self._deadline - self._time.time())
-        else:
+        if not self._rpc.is_active():
             return 0.0
+        if self._deadline is None:
+            return None
+        else:
+            return max(0.0, self._deadline - self._time.time())
 
     def cancel(self):
         self._rpc.application_cancel()

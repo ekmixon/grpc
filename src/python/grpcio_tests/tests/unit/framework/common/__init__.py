@@ -43,7 +43,7 @@ def get_socket(bind_address='localhost',
         - the port to which the socket is bound
         - the socket object itself
     """
-    _sock_options = sock_options if sock_options else []
+    _sock_options = sock_options or []
     if socket.has_ipv6:
         address_families = (socket.AF_INET6, socket.AF_INET)
     else:
@@ -68,8 +68,9 @@ def get_socket(bind_address='localhost',
         except socket.error:  # pylint: disable=duplicate-except
             sock.close()
             continue
-    raise RuntimeError("Failed to bind to {} with sock_options {}".format(
-        bind_address, sock_options))
+    raise RuntimeError(
+        f"Failed to bind to {bind_address} with sock_options {sock_options}"
+    )
 
 
 @contextlib.contextmanager

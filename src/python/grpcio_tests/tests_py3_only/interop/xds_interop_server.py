@@ -133,9 +133,9 @@ def _run(port: int, maintenance_port: int, secure_mode: bool,
 
 
 def bool_arg(arg: str) -> bool:
-    if arg.lower() in ("true", "yes", "y"):
+    if arg.lower() in {"true", "yes", "y"}:
         return True
-    elif arg.lower() in ("false", "no", "n"):
+    elif arg.lower() in {"false", "no", "n"}:
         return False
     else:
         raise argparse.ArgumentTypeError(f"Could not parse '{arg}' as a bool.")

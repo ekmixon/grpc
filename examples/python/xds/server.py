@@ -42,7 +42,7 @@ logger.addHandler(console_handler)
 class Greeter(helloworld_pb2_grpc.GreeterServicer):
 
     def __init__(self, hostname: str):
-        self._hostname = hostname if hostname else socket.gethostname()
+        self._hostname = hostname or socket.gethostname()
 
     def SayHello(self, request: helloworld_pb2.HelloRequest,
                  context: grpc.ServicerContext) -> helloworld_pb2.HelloReply:

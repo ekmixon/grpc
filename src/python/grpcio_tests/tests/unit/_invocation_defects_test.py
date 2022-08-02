@@ -145,9 +145,8 @@ class FailAfterFewIterationsCounter(object):
     def __next__(self):
         if self._current >= self._high:
             raise test_control.Defect()
-        else:
-            self._current += 1
-            return self._bytestring
+        self._current += 1
+        return self._bytestring
 
     next = __next__
 

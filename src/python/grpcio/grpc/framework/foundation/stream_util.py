@@ -107,18 +107,15 @@ class ThreadSwitchingConsumer(stream.Consumer):
                 _LOGGER.exception(e)
 
             with self._lock:
-                if terminate:
+                if terminate or not self._values and self._active:
                     self._spinning = False
                     return
                 elif self._values:
                     value = self._values.pop(0)
                     terminate = not self._values and not self._active
-                elif not self._active:
+                else:
                     value = _NO_VALUE
                     terminate = True
-                else:
-                    self._spinning = False
-                    return
 
     def consume(self, value):
         with self._lock:

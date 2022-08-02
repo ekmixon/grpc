@@ -567,9 +567,11 @@ class TestServer(AioTestBase):
         # Build the channel
         channel = aio.insecure_channel(bind_address)
         # Deplete the concurrent quota with 3 times of max RPCs
-        rpcs = []
-        for _ in range(3 * _MAXIMUM_CONCURRENT_RPCS):
-            rpcs.append(channel.unary_unary(_BLOCK_BRIEFLY)(_REQUEST))
+        rpcs = [
+            channel.unary_unary(_BLOCK_BRIEFLY)(_REQUEST)
+            for _ in range(3 * _MAXIMUM_CONCURRENT_RPCS)
+        ]
+
         task = self.loop.create_task(
             asyncio.wait(rpcs, return_when=asyncio.FIRST_EXCEPTION))
         # Each batch took test_constants.SHORT_TIMEOUT /2

@@ -76,8 +76,7 @@ if contextvars_supported():
 
         def __call__(self, context, callback):
             if test_var.get() != _EXPECTED_VALUE:
-                raise AssertionError("{} != {}".format(test_var.get(),
-                                                       _EXPECTED_VALUE))
+                raise AssertionError(f"{test_var.get()} != {_EXPECTED_VALUE}")
             callback((), None)
 
         def assert_called(self, test):
@@ -104,7 +103,7 @@ class ContextVarsPropagationTest(unittest.TestCase):
     def test_propagation_to_auth_plugin(self):
         set_up_expected_context()
         with _server() as port:
-            target = "localhost:{}".format(port)
+            target = f"localhost:{port}"
             local_credentials = grpc.local_channel_credentials()
             test_call_credentials = TestCallCredentials()
             call_credentials = grpc.metadata_call_credentials(

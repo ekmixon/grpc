@@ -84,16 +84,14 @@ class TestTypeMetadata(unittest.TestCase):
     def test_set(self):
         metadata = Metadata(*self._MULTI_ENTRY_DATA)
         override_value = "override value"
-        for _ in range(3):
-            metadata["key1"] = override_value
+        metadata["key1"] = override_value
 
         self.assertEqual(metadata["key1"], override_value)
         self.assertEqual(metadata.get_all("key1"),
                          [override_value, "other value 1"])
 
         empty_metadata = Metadata()
-        for _ in range(3):
-            empty_metadata["key"] = override_value
+        empty_metadata["key"] = override_value
 
         self.assertEqual(empty_metadata["key"], override_value)
         self.assertEqual(empty_metadata.get_all("key"), [override_value])

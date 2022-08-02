@@ -70,10 +70,12 @@ class TestService(test_pb2_grpc.TestServiceServicer):
                                              response_parameters.size))
 
     def StreamingInputCall(self, request_iterator, context):
-        aggregate_size = 0
-        for request in request_iterator:
-            if request.payload is not None and request.payload.body:
-                aggregate_size += len(request.payload.body)
+        aggregate_size = sum(
+            len(request.payload.body)
+            for request in request_iterator
+            if request.payload is not None and request.payload.body
+        )
+
         return messages_pb2.StreamingInputCallResponse(
             aggregated_payload_size=aggregate_size)
 

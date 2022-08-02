@@ -153,14 +153,12 @@ def _run_concurrent_stream_unary(stub):
                                 3))
         for _ in range(test_constants.THREAD_CONCURRENCY))
     for future_call in future_calls:
-        if future_call.code() is grpc.StatusCode.OK:
-            response = future_call.result()
-            if _application_common.STREAM_UNARY_RESPONSE != response:
-                return _UNSATISFACTORY_OUTCOME
-        else:
+        if future_call.code() is not grpc.StatusCode.OK:
             return _UNSATISFACTORY_OUTCOME
-    else:
-        return _SATISFACTORY_OUTCOME
+        response = future_call.result()
+        if _application_common.STREAM_UNARY_RESPONSE != response:
+            return _UNSATISFACTORY_OUTCOME
+    return _SATISFACTORY_OUTCOME
 
 
 def _run_concurrent_stream_stream(stub):

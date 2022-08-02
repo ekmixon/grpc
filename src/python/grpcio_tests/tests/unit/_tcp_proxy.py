@@ -34,8 +34,7 @@ _TCP_PROXY_TIMEOUT = datetime.timedelta(milliseconds=500)
 
 
 def _init_proxy_socket(gateway_address, gateway_port):
-    proxy_socket = socket.create_connection((gateway_address, gateway_port))
-    return proxy_socket
+    return socket.create_connection((gateway_address, gateway_port))
 
 
 class TcpProxy(object):
@@ -84,8 +83,7 @@ class TcpProxy(object):
                     self._received_byte_count += len(data)
                 self._northbound_data += data
             elif socket_to_read in self._client_sockets:
-                data = socket_to_read.recv(_TCP_PROXY_BUFFER_SIZE)
-                if data:
+                if data := socket_to_read.recv(_TCP_PROXY_BUFFER_SIZE):
                     with self._byte_count_lock:
                         self._sent_byte_count += len(data)
                     self._southbound_data += data

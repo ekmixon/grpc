@@ -34,19 +34,19 @@ _CHILD_FINISH_TIMEOUT_S = 60
 
 
 def _channel(args):
-    target = '{}:{}'.format(args['server_host'], args['server_port'])
-    if args['use_tls']:
-        channel_credentials = grpc.ssl_channel_credentials()
-        channel = grpc.secure_channel(target, channel_credentials)
-    else:
-        channel = grpc.insecure_channel(target)
-    return channel
+    target = f"{args['server_host']}:{args['server_port']}"
+    if not args['use_tls']:
+        return grpc.insecure_channel(target)
+    channel_credentials = grpc.ssl_channel_credentials()
+    return grpc.secure_channel(target, channel_credentials)
 
 
 def _validate_payload_type_and_length(response, expected_type, expected_length):
     if response.payload.type is not expected_type:
-        raise ValueError('expected payload type %s, got %s' %
-                         (expected_type, type(response.payload.type)))
+        raise ValueError(
+            f'expected payload type {expected_type}, got {type(response.payload.type)}'
+        )
+
     elif len(response.payload.body) != expected_length:
         raise ValueError('expected payload body size %d, got %d' %
                          (expected_length, len(response.payload.body)))
@@ -123,7 +123,7 @@ class _ChildProcess(object):
             try:
                 task(*args)
             except grpc.RpcError as rpc_error:
-                self._exceptions.put('RpcError: %s' % rpc_error)
+                self._exceptions.put(f'RpcError: {rpc_error}')
             except Exception as e:  # pylint: disable=broad-except
                 self._exceptions.put(e)
 
@@ -338,12 +338,12 @@ def _in_progress_bidi_continue_call(channel):
         inherited_code = parent_bidi_call.code()
         inherited_details = parent_bidi_call.details()
         if inherited_code != grpc.StatusCode.CANCELLED:
-            raise ValueError('Expected inherited code CANCELLED, got %s' %
-                             inherited_code)
+            raise ValueError(f'Expected inherited code CANCELLED, got {inherited_code}')
         if inherited_details != 'Channel closed due to fork':
             raise ValueError(
-                'Expected inherited details Channel closed due to fork, got %s'
-                % inherited_details)
+                f'Expected inherited details Channel closed due to fork, got {inherited_details}'
+            )
+
 
     # Don't run child_target after closing the parent call, as the call may have
     # received a status from the  server before fork occurs.

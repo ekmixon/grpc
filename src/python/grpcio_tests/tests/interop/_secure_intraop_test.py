@@ -42,12 +42,16 @@ class SecureIntraopTest(_intraop_test_case.IntraopTestCase, unittest.TestCase):
         self.server.start()
         self.stub = test_pb2_grpc.TestServiceStub(
             grpc.secure_channel(
-                'localhost:{}'.format(port),
-                grpc.ssl_channel_credentials(
-                    resources.test_root_certificates()), ((
+                f'localhost:{port}',
+                grpc.ssl_channel_credentials(resources.test_root_certificates()),
+                (
+                    (
                         'grpc.ssl_target_name_override',
                         _SERVER_HOST_OVERRIDE,
-                    ),)))
+                    ),
+                ),
+            )
+        )
 
     def tearDown(self):
         self.server.stop(None)

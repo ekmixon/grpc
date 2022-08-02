@@ -39,8 +39,6 @@ def handle_unary_stream(request, servicer_context):
 
 
 def handle_stream_unary(request_iterator, servicer_context):
-    for request in request_iterator:
-        pass
     return _RESPONSE
 
 

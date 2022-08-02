@@ -37,12 +37,12 @@ _LOGGER = logging.getLogger(__name__)
 
 def run_client(channel_compression, call_compression, target):
     with grpc.insecure_channel(target,
-                               compression=channel_compression) as channel:
+                                   compression=channel_compression) as channel:
         stub = helloworld_pb2_grpc.GreeterStub(channel)
         response = stub.SayHello(helloworld_pb2.HelloRequest(name='you'),
                                  compression=call_compression,
                                  wait_for_ready=True)
-        print("Response: {}".format(response))
+        print(f"Response: {response}")
 
 
 def main():

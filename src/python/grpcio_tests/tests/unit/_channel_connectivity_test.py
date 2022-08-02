@@ -67,7 +67,9 @@ class ChannelConnectivityTest(unittest.TestCase):
         first_connectivities = callback.block_until_connectivities_satisfy(bool)
         channel.subscribe(callback.update, try_to_connect=True)
         second_connectivities = callback.block_until_connectivities_satisfy(
-            lambda connectivities: 2 <= len(connectivities))
+            lambda connectivities: len(connectivities) >= 2
+        )
+
         # Wait for a connection that will never happen.
         time.sleep(test_constants.SHORT_TIMEOUT)
         third_connectivities = callback.connectivities()
@@ -95,7 +97,7 @@ class ChannelConnectivityTest(unittest.TestCase):
         first_callback = _Callback()
         second_callback = _Callback()
 
-        channel = grpc.insecure_channel('localhost:{}'.format(port))
+        channel = grpc.insecure_channel(f'localhost:{port}')
         channel.subscribe(first_callback.update, try_to_connect=False)
         first_connectivities = first_callback.block_until_connectivities_satisfy(
             bool)
@@ -105,7 +107,9 @@ class ChannelConnectivityTest(unittest.TestCase):
         second_connectivities = first_callback.connectivities()
         channel.subscribe(second_callback.update, try_to_connect=True)
         third_connectivities = first_callback.block_until_connectivities_satisfy(
-            lambda connectivities: 2 <= len(connectivities))
+            lambda connectivities: len(connectivities) >= 2
+        )
+
         fourth_connectivities = second_callback.block_until_connectivities_satisfy(
             bool)
         # Wait for a connection that will happen (or may already have happened).
@@ -139,7 +143,7 @@ class ChannelConnectivityTest(unittest.TestCase):
         server.start()
         callback = _Callback()
 
-        channel = grpc.insecure_channel('localhost:{}'.format(port))
+        channel = grpc.insecure_channel(f'localhost:{port}')
         channel.subscribe(callback.update, try_to_connect=True)
         callback.block_until_connectivities_satisfy(_ready_in_connectivities)
         # Now take down the server and confirm that channel readiness is repudiated.

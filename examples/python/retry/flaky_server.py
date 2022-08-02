@@ -33,13 +33,12 @@ class ErrorInjectingGreeter(helloworld_pb2_grpc.GreeterServicer):
             self, request: helloworld_pb2.HelloRequest,
             context: grpc.aio.ServicerContext) -> helloworld_pb2.HelloReply:
         self._counter[context.peer()] += 1
-        if self._counter[context.peer()] < 5:
-            if random.random() < 0.75:
-                logging.info('Injecting error to RPC from %s', context.peer())
-                await context.abort(grpc.StatusCode.UNAVAILABLE,
-                                    'injected error')
+        if self._counter[context.peer()] < 5 and random.random() < 0.75:
+            logging.info('Injecting error to RPC from %s', context.peer())
+            await context.abort(grpc.StatusCode.UNAVAILABLE,
+                                'injected error')
         logging.info('Successfully responding to RPC from %s', context.peer())
-        return helloworld_pb2.HelloReply(message='Hello, %s!' % request.name)
+        return helloworld_pb2.HelloReply(message=f'Hello, {request.name}!')
 
 
 async def serve() -> None:

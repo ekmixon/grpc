@@ -13,6 +13,7 @@
 # limitations under the License.
 """The Python implementation of the GRPC helloworld.Greeter client."""
 
+
 import contextlib
 import datetime
 import logging
@@ -27,19 +28,18 @@ from google.cloud import helloworld_pb2
 from google.cloud import helloworld_pb2_grpc
 
 _HOST = 'localhost'
-_SERVER_ADDRESS = '{}:0'.format(_HOST)
+_SERVER_ADDRESS = f'{_HOST}:0'
 
 
 class Greeter(helloworld_pb2_grpc.GreeterServicer):
 
     def SayHello(self, request, context):
         request_in_flight = datetime.datetime.now() - \
-                            request.request_initiation.ToDatetime()
+                                request.request_initiation.ToDatetime()
         request_duration = duration_pb2.Duration()
         request_duration.FromTimedelta(request_in_flight)
         return helloworld_pb2.HelloReply(
-            message='Hello, %s!' % request.name,
-            request_duration=request_duration,
+            message=f'Hello, {request.name}!', request_duration=request_duration
         )
 
 
@@ -58,7 +58,7 @@ def _listening_server():
 class ImportTest(unittest.TestCase):
     def test_import(self):
         with _listening_server() as port:
-            with grpc.insecure_channel('{}:{}'.format(_HOST, port)) as channel:
+            with grpc.insecure_channel(f'{_HOST}:{port}') as channel:
                 stub = helloworld_pb2_grpc.GreeterStub(channel)
                 request_timestamp = timestamp_pb2.Timestamp()
                 request_timestamp.GetCurrentTime()

@@ -43,10 +43,16 @@ class TypeSmokeTest(unittest.TestCase):
         del completion_queue
 
     def testServerUpDown(self):
-        server = cygrpc.Server(set([(
-            b'grpc.so_reuseport',
-            0,
-        )]), False)
+        server = cygrpc.Server(
+            {
+                (
+                    b'grpc.so_reuseport',
+                    0,
+                )
+            },
+            False,
+        )
+
         del server
 
     def testChannelUpDown(self):
@@ -112,11 +118,16 @@ class ServerClientMixin(object):
                 host_override,
             ),)
             self.client_channel = cygrpc.Channel(
-                'localhost:{}'.format(self.port).encode(),
-                client_channel_arguments, client_credentials)
+                f'localhost:{self.port}'.encode(),
+                client_channel_arguments,
+                client_credentials,
+            )
+
         else:
             self.client_channel = cygrpc.Channel(
-                'localhost:{}'.format(self.port).encode(), set(), None)
+                f'localhost:{self.port}'.encode(), set(), None
+            )
+
         if host_override:
             self.host_argument = None  # default host
             self.expected_host = host_override
@@ -273,14 +284,17 @@ class ServerClientMixin(object):
                 self.assertEqual(SERVER_STATUS_DETAILS, client_result.details())
                 self.assertEqual(SERVER_STATUS_CODE, client_result.code())
         self.assertEqual(
-            set([
+            {
                 cygrpc.OperationType.send_initial_metadata,
                 cygrpc.OperationType.send_message,
                 cygrpc.OperationType.send_close_from_client,
                 cygrpc.OperationType.receive_initial_metadata,
                 cygrpc.OperationType.receive_message,
-                cygrpc.OperationType.receive_status_on_client
-            ]), found_client_op_types)
+                cygrpc.OperationType.receive_status_on_client,
+            },
+            found_client_op_types,
+        )
+
 
         self.assertEqual(5, len(server_event.batch_operations))
         found_server_op_types = set()
@@ -293,13 +307,16 @@ class ServerClientMixin(object):
             ) == cygrpc.OperationType.receive_close_on_server:
                 self.assertFalse(server_result.cancelled())
         self.assertEqual(
-            set([
+            {
                 cygrpc.OperationType.send_initial_metadata,
                 cygrpc.OperationType.receive_message,
                 cygrpc.OperationType.send_message,
                 cygrpc.OperationType.receive_close_on_server,
-                cygrpc.OperationType.send_status_from_server
-            ]), found_server_op_types)
+                cygrpc.OperationType.send_status_from_server,
+            },
+            found_server_op_types,
+        )
+
 
         del client_call
         del server_call

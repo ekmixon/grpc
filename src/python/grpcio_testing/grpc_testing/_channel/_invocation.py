@@ -159,15 +159,13 @@ def _done(handler):
 
 def _with_extras_unary_response(handler, extras):
     with extras.condition:
-        if extras.unary_response is _NOT_YET_OBSERVED:
-            read = handler.take_response()
-            if read.code is None:
-                extras.unary_response = read.response
-                return read.response
-            else:
-                raise _RpcErrorCall(handler)
-        else:
+        if extras.unary_response is not _NOT_YET_OBSERVED:
             return extras.unary_response
+        read = handler.take_response()
+        if read.code is not None:
+            raise _RpcErrorCall(handler)
+        extras.unary_response = read.response
+        return read.response
 
 
 def _exception(unused_handler):
@@ -259,24 +257,22 @@ def consume_requests(request_iterator, handler):
 
 def blocking_unary_response(handler):
     read = handler.take_response()
-    if read.code is None:
-        unused_trailing_metadata, code, unused_details = handler.termination()
-        if code is grpc.StatusCode.OK:
-            return read.response
-        else:
-            raise _RpcErrorCall(handler)
+    if read.code is not None:
+        raise _RpcErrorCall(handler)
+    unused_trailing_metadata, code, unused_details = handler.termination()
+    if code is grpc.StatusCode.OK:
+        return read.response
     else:
         raise _RpcErrorCall(handler)
 
 
 def blocking_unary_response_with_call(handler):
     read = handler.take_response()
-    if read.code is None:
-        unused_trailing_metadata, code, unused_details = handler.termination()
-        if code is grpc.StatusCode.OK:
-            return read.response, _Call(handler)
-        else:
-            raise _RpcErrorCall(handler)
+    if read.code is not None:
+        raise _RpcErrorCall(handler)
+    unused_trailing_metadata, code, unused_details = handler.termination()
+    if code is grpc.StatusCode.OK:
+        return read.response, _Call(handler)
     else:
         raise _RpcErrorCall(handler)
 

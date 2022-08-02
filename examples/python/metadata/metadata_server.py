@@ -27,13 +27,13 @@ class Greeter(helloworld_pb2_grpc.GreeterServicer):
 
     def SayHello(self, request, context):
         for key, value in context.invocation_metadata():
-            print('Received initial metadata: key=%s value=%s' % (key, value))
+            print(f'Received initial metadata: key={key} value={value}')
 
         context.set_trailing_metadata((
             ('checksum-bin', b'I agree'),
             ('retry', 'false'),
         ))
-        return helloworld_pb2.HelloReply(message='Hello, %s!' % request.name)
+        return helloworld_pb2.HelloReply(message=f'Hello, {request.name}!')
 
 
 def serve():

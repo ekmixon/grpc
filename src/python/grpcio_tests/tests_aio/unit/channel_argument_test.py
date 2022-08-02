@@ -84,9 +84,8 @@ async def test_if_reuse_port_enabled(server: aio.Server):
     except OSError as e:
         if e.errno in _ADDRESS_TOKEN_ERRNO:
             return False
-        else:
-            logging.exception(e)
-            raise
+        logging.exception(e)
+        raise
     else:
         return True
 

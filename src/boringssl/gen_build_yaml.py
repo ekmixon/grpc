@@ -34,7 +34,7 @@ except IOError:
 
 
 def map_dir(filename):
-    return 'third_party/boringssl-with-bazel/' + filename
+    return f'third_party/boringssl-with-bazel/{filename}'
 
 
 class Grpc(object):
@@ -51,42 +51,35 @@ class Grpc(object):
                 f.endswith(".S") or f.endswith(".asm") for f in value)
         }
         self.yaml = {
-            '#':
-                'generated with src/boringssl/gen_build_yaml.py',
+            '#': 'generated with src/boringssl/gen_build_yaml.py',
             'raw_boringssl_build_output_for_debugging': {
                 'files': files,
             },
             'libs': [
                 {
-                    'name':
-                        'boringssl',
-                    'build':
-                        'private',
-                    'language':
-                        'c',
-                    'secure':
-                        False,
-                    'src':
-                        sorted(
-                            map_dir(f) for f in files['ssl'] + files['crypto']),
+                    'name': 'boringssl',
+                    'build': 'private',
+                    'language': 'c',
+                    'secure': False,
+                    'src': sorted(
+                        map_dir(f) for f in files['ssl'] + files['crypto']
+                    ),
                     'asm_src': {
-                        k: [map_dir(f) for f in value
-                           ] for k, value in asm_outputs.items()
+                        k: [map_dir(f) for f in value]
+                        for k, value in asm_outputs.items()
                     },
-                    'headers':
-                        sorted(
-                            map_dir(f)
-                            # We want to include files['fips_fragments'], but not build them as objects.
-                            # See https://boringssl-review.googlesource.com/c/boringssl/+/16946
-                            for f in files['ssl_headers'] +
-                            files['ssl_internal_headers'] +
-                            files['crypto_headers'] +
-                            files['crypto_internal_headers'] +
-                            files['fips_fragments']),
-                    'boringssl':
-                        True,
-                    'defaults':
-                        'boringssl',
+                    'headers': sorted(
+                        map_dir(f)
+                        # We want to include files['fips_fragments'], but not build them as objects.
+                        # See https://boringssl-review.googlesource.com/c/boringssl/+/16946
+                        for f in files['ssl_headers']
+                        + files['ssl_internal_headers']
+                        + files['crypto_headers']
+                        + files['crypto_internal_headers']
+                        + files['fips_fragments']
+                    ),
+                    'boringssl': True,
+                    'defaults': 'boringssl',
                 },
                 {
                     'name': 'boringssl_test_util',
@@ -96,36 +89,42 @@ class Grpc(object):
                     'boringssl': True,
                     'defaults': 'boringssl',
                     'src': [map_dir(f) for f in sorted(files['test_support'])],
-                }
+                },
             ],
-            'targets': [{
-                'name': 'boringssl_%s' % test,
-                'build': 'test',
-                'run': False,
-                'secure': False,
-                'language': 'c++',
-                'src': sorted(map_dir(f) for f in files[test]),
-                'vs_proj_dir': 'test/boringssl',
-                'boringssl': True,
-                'defaults': 'boringssl',
-                'deps': [
-                    'boringssl_test_util',
-                    'boringssl',
-                ]
-            } for test in test_binaries],
-            'tests': [{
-                'name': 'boringssl_%s' % test,
-                'args': [],
-                'exclude_configs': ['asan', 'ubsan'],
-                'ci_platforms': ['linux', 'mac', 'posix', 'windows'],
-                'platforms': ['linux', 'mac', 'posix', 'windows'],
-                'flaky': False,
-                'gtest': True,
-                'language': 'c++',
-                'boringssl': True,
-                'defaults': 'boringssl',
-                'cpu_cost': 1.0
-            } for test in test_binaries]
+            'targets': [
+                {
+                    'name': f'boringssl_{test}',
+                    'build': 'test',
+                    'run': False,
+                    'secure': False,
+                    'language': 'c++',
+                    'src': sorted(map_dir(f) for f in files[test]),
+                    'vs_proj_dir': 'test/boringssl',
+                    'boringssl': True,
+                    'defaults': 'boringssl',
+                    'deps': [
+                        'boringssl_test_util',
+                        'boringssl',
+                    ],
+                }
+                for test in test_binaries
+            ],
+            'tests': [
+                {
+                    'name': f'boringssl_{test}',
+                    'args': [],
+                    'exclude_configs': ['asan', 'ubsan'],
+                    'ci_platforms': ['linux', 'mac', 'posix', 'windows'],
+                    'platforms': ['linux', 'mac', 'posix', 'windows'],
+                    'flaky': False,
+                    'gtest': True,
+                    'language': 'c++',
+                    'boringssl': True,
+                    'defaults': 'boringssl',
+                    'cpu_cost': 1.0,
+                }
+                for test in test_binaries
+            ],
         }
 
 

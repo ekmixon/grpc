@@ -60,8 +60,9 @@ class AioTestBase(unittest.TestCase):
         attr = super().__getattribute__(name)
 
         # If possible, converts the coroutine into a sync function.
-        if name.startswith('test_') or name in _COROUTINE_FUNCTION_ALLOWLIST:
-            if asyncio.iscoroutinefunction(attr):
-                return _async_to_sync_decorator(attr, self._TEST_LOOP)
+        if (
+            name.startswith('test_') or name in _COROUTINE_FUNCTION_ALLOWLIST
+        ) and asyncio.iscoroutinefunction(attr):
+            return _async_to_sync_decorator(attr, self._TEST_LOOP)
         # For other attributes, let them pass.
         return attr

@@ -69,7 +69,7 @@ async def guide_list_features(
 def generate_route(
     feature_list: List[route_guide_pb2.Feature]
 ) -> Iterable[route_guide_pb2.Point]:
-    for _ in range(0, 10):
+    for _ in range(10):
         random_feature = random.choice(feature_list)
         print(f"Visiting point {random_feature.location}")
         yield random_feature.location

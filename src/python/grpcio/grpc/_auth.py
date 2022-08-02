@@ -19,7 +19,7 @@ import grpc
 
 
 def _sign_request(callback, token, error):
-    metadata = (('authorization', 'Bearer {}'.format(token)),)
+    metadata = (('authorization', f'Bearer {token}'), )
     callback(metadata, error)
 
 

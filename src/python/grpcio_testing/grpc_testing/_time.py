@@ -89,18 +89,16 @@ class _Future(grpc.Future):
         with self._state.condition:
             if self._cancelled:
                 return True
-            else:
-                behaviors_at_time = self._state.times_to_behaviors.get(
-                    self._time)
-                if behaviors_at_time is None:
-                    return False
-                else:
-                    behaviors_at_time.remove(self._behavior)
-                    if not behaviors_at_time:
-                        self._state.times_to_behaviors.pop(self._time)
-                        self._state.condition.notify_all()
-                    self._cancelled = True
-                    return True
+            behaviors_at_time = self._state.times_to_behaviors.get(
+                self._time)
+            if behaviors_at_time is None:
+                return False
+            behaviors_at_time.remove(self._behavior)
+            if not behaviors_at_time:
+                self._state.times_to_behaviors.pop(self._time)
+                self._state.condition.notify_all()
+            self._cancelled = True
+            return True
 
     def cancelled(self):
         with self._state.condition:
@@ -215,7 +213,7 @@ class StrictFakeTime(grpc_testing.Time):
         return _Future(self._state, behavior, time)
 
     def sleep_for(self, duration):
-        if 0 < duration:
+        if duration > 0:
             with self._state.condition:
                 self._time += duration
                 delta = _process(self._state, self._time)

@@ -242,42 +242,44 @@ class _LoggingInterceptor(grpc.ServerInterceptor,
         self.record = record
 
     def intercept_service(self, continuation, handler_call_details):
-        self.record.append(self.tag + ':intercept_service')
+        self.record.append(f'{self.tag}:intercept_service')
         return continuation(handler_call_details)
 
     def intercept_unary_unary(self, continuation, client_call_details, request):
-        self.record.append(self.tag + ':intercept_unary_unary')
+        self.record.append(f'{self.tag}:intercept_unary_unary')
         result = continuation(client_call_details, request)
         assert isinstance(
-            result,
-            grpc.Call), '{} ({}) is not an instance of grpc.Call'.format(
-                result, type(result))
+            result, grpc.Call
+        ), f'{result} ({type(result)}) is not an instance of grpc.Call'
+
         assert isinstance(
-            result,
-            grpc.Future), '{} ({}) is not an instance of grpc.Future'.format(
-                result, type(result))
+            result, grpc.Future
+        ), f'{result} ({type(result)}) is not an instance of grpc.Future'
+
         return result
 
     def intercept_unary_stream(self, continuation, client_call_details,
                                request):
-        self.record.append(self.tag + ':intercept_unary_stream')
+        self.record.append(f'{self.tag}:intercept_unary_stream')
         return continuation(client_call_details, request)
 
     def intercept_stream_unary(self, continuation, client_call_details,
                                request_iterator):
-        self.record.append(self.tag + ':intercept_stream_unary')
+        self.record.append(f'{self.tag}:intercept_stream_unary')
         result = continuation(client_call_details, request_iterator)
         assert isinstance(
-            result,
-            grpc.Call), '{} is not an instance of grpc.Call'.format(result)
+            result, grpc.Call
+        ), f'{result} is not an instance of grpc.Call'
+
         assert isinstance(
-            result,
-            grpc.Future), '{} is not an instance of grpc.Future'.format(result)
+            result, grpc.Future
+        ), f'{result} is not an instance of grpc.Future'
+
         return result
 
     def intercept_stream_stream(self, continuation, client_call_details,
                                 request_iterator):
-        self.record.append(self.tag + ':intercept_stream_stream')
+        self.record.append(f'{self.tag}:intercept_stream_stream')
         return continuation(client_call_details, request_iterator)
 
 

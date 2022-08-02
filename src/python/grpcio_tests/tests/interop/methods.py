@@ -42,14 +42,12 @@ _TRAILING_METADATA_KEY = "x-grpc-test-echo-trailing-bin"
 
 def _expect_status_code(call, expected_code):
     if call.code() != expected_code:
-        raise ValueError('expected code %s, got %s' %
-                         (expected_code, call.code()))
+        raise ValueError(f'expected code {expected_code}, got {call.code()}')
 
 
 def _expect_status_details(call, expected_details):
     if call.details() != expected_details:
-        raise ValueError('expected message %s, got %s' %
-                         (expected_details, call.details()))
+        raise ValueError(f'expected message {expected_details}, got {call.details()}')
 
 
 def _validate_status_code_and_details(call, expected_code, expected_details):
@@ -59,8 +57,10 @@ def _validate_status_code_and_details(call, expected_code, expected_details):
 
 def _validate_payload_type_and_length(response, expected_type, expected_length):
     if response.payload.type is not expected_type:
-        raise ValueError('expected payload type %s, got %s' %
-                         (expected_type, type(response.payload.type)))
+        raise ValueError(
+            f'expected payload type {expected_type}, got {type(response.payload.type)}'
+        )
+
     elif len(response.payload.body) != expected_length:
         raise ValueError('expected payload body size %d, got %d' %
                          (expected_length, len(response.payload.body)))
@@ -330,14 +330,16 @@ def _custom_metadata(stub):
     def _validate_metadata(response):
         initial_metadata = dict(response.initial_metadata())
         if initial_metadata[_INITIAL_METADATA_KEY] != initial_metadata_value:
-            raise ValueError('expected initial metadata %s, got %s' %
-                             (initial_metadata_value,
-                              initial_metadata[_INITIAL_METADATA_KEY]))
+            raise ValueError(
+                f'expected initial metadata {initial_metadata_value}, got {initial_metadata[_INITIAL_METADATA_KEY]}'
+            )
+
         trailing_metadata = dict(response.trailing_metadata())
         if trailing_metadata[_TRAILING_METADATA_KEY] != trailing_metadata_value:
-            raise ValueError('expected trailing metadata %s, got %s' %
-                             (trailing_metadata_value,
-                              trailing_metadata[_TRAILING_METADATA_KEY]))
+            raise ValueError(
+                f'expected trailing metadata {trailing_metadata_value}, got {trailing_metadata[_TRAILING_METADATA_KEY]}'
+            )
+
 
     # Testing with UnaryCall
     request = messages_pb2.SimpleRequest(
@@ -362,8 +364,9 @@ def _custom_metadata(stub):
 def _compute_engine_creds(stub, args):
     response = _large_unary_common_behavior(stub, True, True, None)
     if args.default_service_account != response.username:
-        raise ValueError('expected username %s, got %s' %
-                         (args.default_service_account, response.username))
+        raise ValueError(
+            f'expected username {args.default_service_account}, got {response.username}'
+        )
 
 
 def _oauth2_auth_token(stub, args):
@@ -371,12 +374,11 @@ def _oauth2_auth_token(stub, args):
     wanted_email = json.load(open(json_key_filename, 'r'))['client_email']
     response = _large_unary_common_behavior(stub, True, True, None)
     if wanted_email != response.username:
-        raise ValueError('expected username %s, got %s' %
-                         (wanted_email, response.username))
+        raise ValueError(f'expected username {wanted_email}, got {response.username}')
     if args.oauth_scope.find(response.oauth_scope) == -1:
         raise ValueError(
-            'expected to find oauth scope "{}" in received "{}"'.format(
-                response.oauth_scope, args.oauth_scope))
+            f'expected to find oauth scope "{response.oauth_scope}" in received "{args.oauth_scope}"'
+        )
 
 
 def _jwt_token_creds(stub, args):
@@ -384,8 +386,7 @@ def _jwt_token_creds(stub, args):
     wanted_email = json.load(open(json_key_filename, 'r'))['client_email']
     response = _large_unary_common_behavior(stub, True, False, None)
     if wanted_email != response.username:
-        raise ValueError('expected username %s, got %s' %
-                         (wanted_email, response.username))
+        raise ValueError(f'expected username {wanted_email}, got {response.username}')
 
 
 def _per_rpc_creds(stub, args):
@@ -399,8 +400,7 @@ def _per_rpc_creds(stub, args):
             request=google_auth_transport_requests.Request()))
     response = _large_unary_common_behavior(stub, True, False, call_credentials)
     if wanted_email != response.username:
-        raise ValueError('expected username %s, got %s' %
-                         (wanted_email, response.username))
+        raise ValueError(f'expected username {wanted_email}, got {response.username}')
 
 
 def _special_status_message(stub, args):

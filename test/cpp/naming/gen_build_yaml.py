@@ -24,13 +24,15 @@ _LOCAL_DNS_SERVER_ADDRESS = '127.0.0.1:15353'
 
 
 def _append_zone_name(name, zone_name):
-    return '%s.%s' % (name, zone_name)
+    return f'{name}.{zone_name}'
 
 
 def _build_expected_addrs_cmd_arg(expected_addrs):
-    out = []
-    for addr in expected_addrs:
-        out.append('%s,%s' % (addr['address'], str(addr['is_balancer'])))
+    out = [
+        f"{addr['address']},{str(addr['is_balancer'])}"
+        for addr in expected_addrs
+    ]
+
     return ';'.join(out)
 
 

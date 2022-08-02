@@ -94,8 +94,7 @@ def validate_client_metadata(test, servicer_context):
         test_common.metadata_transmitted(_EXPECTED_INVOCATION_METADATA,
                                          invocation_metadata))
     user_agent = _user_agent(invocation_metadata)
-    test.assertTrue(
-        user_agent.startswith('primary-agent ' + _channel._USER_AGENT))
+    test.assertTrue(user_agent.startswith(f'primary-agent {_channel._USER_AGENT}'))
     test.assertTrue(user_agent.endswith('secondary-agent'))
 
 
@@ -118,9 +117,6 @@ def handle_stream_unary(test, request_iterator, servicer_context):
     validate_client_metadata(test, servicer_context)
     servicer_context.send_initial_metadata(_INITIAL_METADATA)
     servicer_context.set_trailing_metadata(_TRAILING_METADATA)
-    # TODO(issue:#6891) We should be able to remove this loop
-    for request in request_iterator:
-        pass
     return _RESPONSE
 
 
@@ -205,8 +201,6 @@ class MetadataTest(unittest.TestCase):
         self.assertTrue(
             test_common.metadata_transmitted(_EXPECTED_INITIAL_METADATA,
                                              call.initial_metadata()))
-        for _ in call:
-            pass
         self.assertTrue(
             test_common.metadata_transmitted(_EXPECTED_TRAILING_METADATA,
                                              call.trailing_metadata()))
@@ -230,8 +224,6 @@ class MetadataTest(unittest.TestCase):
         self.assertTrue(
             test_common.metadata_transmitted(_EXPECTED_INITIAL_METADATA,
                                              call.initial_metadata()))
-        for _ in call:
-            pass
         self.assertTrue(
             test_common.metadata_transmitted(_EXPECTED_TRAILING_METADATA,
                                              call.trailing_metadata()))

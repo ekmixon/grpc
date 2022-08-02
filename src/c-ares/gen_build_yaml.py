@@ -19,7 +19,7 @@ import os
 import sys
 import yaml
 
-os.chdir(os.path.dirname(sys.argv[0]) + '/../..')
+os.chdir(f'{os.path.dirname(sys.argv[0])}/../..')
 
 out = {}
 

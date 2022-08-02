@@ -64,8 +64,7 @@ def create_client_channel(addr: str) -> grpc.aio.Channel:
         channel_credential,
         call_credentials,
     )
-    channel = grpc.aio.secure_channel(addr, composite_credentials)
-    return channel
+    return grpc.aio.secure_channel(addr, composite_credentials)
 
 
 async def send_rpc(channel: grpc.aio.Channel) -> helloworld_pb2.HelloReply:

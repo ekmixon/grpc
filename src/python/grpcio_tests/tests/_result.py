@@ -83,9 +83,7 @@ class CaseResult(
             assert skip_reason is not None
         elif kind is CaseResult.Kind.EXPECTED_FAILURE:
             assert traceback is not None
-        elif kind is CaseResult.Kind.UNEXPECTED_SUCCESS:
-            pass
-        else:
+        elif kind is not CaseResult.Kind.UNEXPECTED_SUCCESS:
             assert False
         return super(cls, CaseResult).__new__(cls, id, name, kind, stdout,
                                               stderr, skip_reason, traceback)
@@ -141,7 +139,7 @@ class AugmentedResult(unittest.TestResult):
     def startTestRun(self):
         """See unittest.TestResult.startTestRun."""
         super(AugmentedResult, self).startTestRun()
-        self.cases = dict()
+        self.cases = {}
 
     def startTest(self, test):
         """See unittest.TestResult.startTest."""
@@ -287,43 +285,37 @@ class TerminalResult(CoverageResult):
     def addError(self, test, err):
         """See unittest.TestResult.addError."""
         super(TerminalResult, self).addError(test, err)
-        self.out.write(_Colors.FAIL + 'ERROR         {}\n'.format(test.id()) +
-                       _Colors.END)
+        self.out.write((_Colors.FAIL + f'ERROR         {test.id()}\n' + _Colors.END))
         self.out.flush()
 
     def addFailure(self, test, err):
         """See unittest.TestResult.addFailure."""
         super(TerminalResult, self).addFailure(test, err)
-        self.out.write(_Colors.FAIL + 'FAILURE       {}\n'.format(test.id()) +
-                       _Colors.END)
+        self.out.write((_Colors.FAIL + f'FAILURE       {test.id()}\n' + _Colors.END))
         self.out.flush()
 
     def addSuccess(self, test):
         """See unittest.TestResult.addSuccess."""
         super(TerminalResult, self).addSuccess(test)
-        self.out.write(_Colors.OK + 'SUCCESS       {}\n'.format(test.id()) +
-                       _Colors.END)
+        self.out.write((_Colors.OK + f'SUCCESS       {test.id()}\n' + _Colors.END))
         self.out.flush()
 
     def addSkip(self, test, reason):
         """See unittest.TestResult.addSkip."""
         super(TerminalResult, self).addSkip(test, reason)
-        self.out.write(_Colors.INFO + 'SKIP          {}\n'.format(test.id()) +
-                       _Colors.END)
+        self.out.write((_Colors.INFO + f'SKIP          {test.id()}\n' + _Colors.END))
         self.out.flush()
 
     def addExpectedFailure(self, test, err):
         """See unittest.TestResult.addExpectedFailure."""
         super(TerminalResult, self).addExpectedFailure(test, err)
-        self.out.write(_Colors.INFO + 'FAILURE_OK    {}\n'.format(test.id()) +
-                       _Colors.END)
+        self.out.write((_Colors.INFO + f'FAILURE_OK    {test.id()}\n' + _Colors.END))
         self.out.flush()
 
     def addUnexpectedSuccess(self, test):
         """See unittest.TestResult.addUnexpectedSuccess."""
         super(TerminalResult, self).addUnexpectedSuccess(test)
-        self.out.write(_Colors.INFO + 'UNEXPECTED_OK {}\n'.format(test.id()) +
-                       _Colors.END)
+        self.out.write((_Colors.INFO + f'UNEXPECTED_OK {test.id()}\n' + _Colors.END))
         self.out.flush()
 
 
@@ -406,8 +398,8 @@ def summary(result):
              stderr=result.stderr)
         for result in itertools.chain(failures, errors)
     ])
-    notes = 'Unexpected successes: {}\n'.format(
-        [result.name for result in unexpected_successes])
+    notes = f'Unexpected successes: {[result.name for result in unexpected_successes]}\n'
+
     return statistics + '\nErrors/Failures: \n' + tracebacks + '\n' + notes
 
 

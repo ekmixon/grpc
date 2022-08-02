@@ -26,10 +26,9 @@ import route_guide_resources
 
 def get_feature(feature_db, point):
     """Returns Feature at given location or None."""
-    for feature in feature_db:
-        if feature.location == point:
-            return feature
-    return None
+    return next(
+        (feature for feature in feature_db if feature.location == point), None
+    )
 
 
 def get_distance(start, end):

@@ -139,9 +139,7 @@ class ClientTest(unittest.TestCase):
                 self._real_time_channel.take_stream_stream(
                     _application_testing_common.FIRST_SERVICE_STRESTRE))
             rpcs.append(rpc)
-        requests = {}
-        for rpc in rpcs:
-            requests[rpc] = [rpc.take_request()]
+        requests = {rpc: [rpc.take_request()] for rpc in rpcs}
         for rpc in rpcs:
             rpc.send_response(_application_common.STREAM_STREAM_RESPONSE)
             rpc.send_response(_application_common.STREAM_STREAM_RESPONSE)

@@ -97,21 +97,27 @@ class TimeTest(object):
 
     def test_many(self):
         test_events = tuple(threading.Event() for _ in range(_MANY))
-        possibly_cancelled_futures = {}
-        background_noise_futures = []
+        possibly_cancelled_futures = {
+            test_event: self._time.call_in(
+                test_event.set, _QUANTUM * (2 + random.random())
+            )
+            for test_event in test_events
+        }
 
-        for test_event in test_events:
-            possibly_cancelled_futures[test_event] = self._time.call_in(
-                test_event.set, _QUANTUM * (2 + random.random()))
-        for _ in range(_MANY):
-            background_noise_futures.append(
-                self._time.call_in(threading.Event().set,
-                                   _QUANTUM * 1000 * random.random()))
+        background_noise_futures = [
+            self._time.call_in(
+                threading.Event().set, _QUANTUM * 1000 * random.random()
+            )
+            for _ in range(_MANY)
+        ]
+
         self._time.sleep_for(_QUANTUM)
-        cancelled = set()
-        for test_event, test_future in possibly_cancelled_futures.items():
-            if bool(random.randint(0, 1)) and test_future.cancel():
-                cancelled.add(test_event)
+        cancelled = {
+            test_event
+            for test_event, test_future in possibly_cancelled_futures.items()
+            if bool(random.randint(0, 1)) and test_future.cancel()
+        }
+
         self._time.sleep_for(_QUANTUM * 3)
 
         for test_event in test_events:

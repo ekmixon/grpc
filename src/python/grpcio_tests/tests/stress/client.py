@@ -77,8 +77,7 @@ def _test_case_from_arg(test_case_arg):
     for test_case in methods.TestCase:
         if test_case_arg == test_case.value:
             return test_case
-    else:
-        raise ValueError('No test case {}!'.format(test_case_arg))
+    raise ValueError(f'No test case {test_case_arg}!')
 
 
 def _parse_weighted_test_cases(test_case_args):
@@ -125,7 +124,7 @@ def run_test(args):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=25))
     metrics_pb2_grpc.add_MetricsServiceServicer_to_server(
         metrics_server.MetricsServer(hist), server)
-    server.add_insecure_port('[::]:{}'.format(args.metrics_port))
+    server.add_insecure_port(f'[::]:{args.metrics_port}')
     server.start()
 
     for test_server_target in test_server_targets:

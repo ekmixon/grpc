@@ -34,13 +34,12 @@ class State(_common.ChannelRpcHandler):
     def initial_metadata(self):
         with self._condition:
             while True:
-                if self._initial_metadata is None:
-                    if self._code is None:
-                        self._condition.wait()
-                    else:
-                        return _common.FUSSED_EMPTY_METADATA
-                else:
+                if self._initial_metadata is not None:
                     return self._initial_metadata
+                if self._code is None:
+                    self._condition.wait()
+                else:
+                    return _common.FUSSED_EMPTY_METADATA
 
     def add_request(self, request):
         with self._condition:
@@ -61,15 +60,14 @@ class State(_common.ChannelRpcHandler):
         with self._condition:
             while True:
                 if self._code is grpc.StatusCode.OK:
-                    if self._responses:
-                        response = self._responses.pop(0)
-                        return _common.ChannelRpcRead(response, None, None,
-                                                      None)
-                    else:
+                    if not self._responses:
                         return _common.ChannelRpcRead(None,
                                                       self._trailing_metadata,
                                                       grpc.StatusCode.OK,
                                                       self._details)
+                    response = self._responses.pop(0)
+                    return _common.ChannelRpcRead(response, None, None,
+                                                  None)
                 elif self._code is None:
                     if self._responses:
                         response = self._responses.pop(0)
@@ -106,10 +104,9 @@ class State(_common.ChannelRpcHandler):
         with self._condition:
             if self._invocation_metadata is None:
                 raise ValueError('Expected invocation metadata!')
-            else:
-                invocation_metadata = self._invocation_metadata
-                self._invocation_metadata = None
-                return invocation_metadata
+            invocation_metadata = self._invocation_metadata
+            self._invocation_metadata = None
+            return invocation_metadata
 
     def take_invocation_metadata_and_request(self):
         with self._condition:
@@ -180,8 +177,7 @@ class State(_common.ChannelRpcHandler):
                 elif self._code is None:
                     self._condition.wait()
                 else:
-                    raise ValueError('Status code unexpectedly {}!'.format(
-                        self._code))
+                    raise ValueError(f'Status code unexpectedly {self._code}!')
 
     def is_active(self):
         raise NotImplementedError()

@@ -97,10 +97,8 @@ def iterate_suite_cases(suite):
   """
     for item in suite:
         if isinstance(item, unittest.TestSuite):
-            for child_item in iterate_suite_cases(item):
-                yield child_item
+            yield from iterate_suite_cases(item)
         elif isinstance(item, unittest.TestCase):
             yield item
         else:
-            raise ValueError('unexpected suite item of type {}'.format(
-                type(item)))
+            raise ValueError(f'unexpected suite item of type {type(item)}')

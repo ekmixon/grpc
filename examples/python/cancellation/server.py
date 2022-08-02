@@ -58,9 +58,7 @@ class HashFinder(hash_name_pb2_grpc.HashFinderServicer):
             _LOGGER.info("Cancelling RPC due to exhausted resources.")
             context.cancel()
         _LOGGER.debug("Servicer thread returning.")
-        if not candidates:
-            return hash_name_pb2.HashNameResponse()
-        return candidates[-1]
+        return candidates[-1] if candidates else hash_name_pb2.HashNameResponse()
 
     def FindRange(self, request, context):
         stop_event = threading.Event()
@@ -77,8 +75,7 @@ class HashFinder(hash_name_pb2_grpc.HashFinderServicer):
             self._maximum_hashes,
             interesting_hamming_distance=request.interesting_hamming_distance)
         try:
-            for candidate in secret_generator:
-                yield candidate
+            yield from secret_generator
         except search.ResourceLimitExceededError:
             _LOGGER.info("Cancelling RPC due to exhausted resources.")
             context.cancel()
@@ -93,10 +90,10 @@ def _running_server(port, maximum_hashes):
                          maximum_concurrent_rpcs=1)
     hash_name_pb2_grpc.add_HashFinderServicer_to_server(
         HashFinder(maximum_hashes), server)
-    address = '{}:{}'.format(_SERVER_HOST, port)
+    address = f'{_SERVER_HOST}:{port}'
     actual_port = server.add_insecure_port(address)
     server.start()
-    print("Server listening at '{}'".format(address))
+    print(f"Server listening at '{address}'")
     return server
 
 

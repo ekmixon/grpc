@@ -64,7 +64,7 @@ class TestUnaryUnaryClientInterceptor(AioTestBase):
                 call = await continuation(client_call_details, request)
                 return call
 
-        interceptors = [Interceptor() for i in range(2)]
+        interceptors = [Interceptor() for _ in range(2)]
 
         async with aio.insecure_channel(self._server_target,
                                         interceptors=interceptors) as channel:

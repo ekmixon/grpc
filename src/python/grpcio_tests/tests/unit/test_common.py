@@ -75,8 +75,7 @@ def metadata_transmitted(original_metadata, transmitted_metadata):
                         break
         except StopIteration:
             return False
-    else:
-        return True
+    return True
 
 
 def test_secure_channel(target, channel_credentials, server_host_override):
@@ -93,11 +92,16 @@ def test_secure_channel(target, channel_credentials, server_host_override):
     An implementations.Channel to the remote host through which RPCs may be
       conducted.
   """
-    channel = grpc.secure_channel(target, channel_credentials, ((
-        'grpc.ssl_target_name_override',
-        server_host_override,
-    ),))
-    return channel
+    return grpc.secure_channel(
+        target,
+        channel_credentials,
+        (
+            (
+                'grpc.ssl_target_name_override',
+                server_host_override,
+            ),
+        ),
+    )
 
 
 def test_server(max_workers=10, reuse_port=False):

@@ -107,7 +107,7 @@ class _ChannelServerPair:
 
 async def _create_channel_server_pairs(n, channelz_stub=None):
     """Create channel-server pairs."""
-    pairs = [_ChannelServerPair() for i in range(n)]
+    pairs = [_ChannelServerPair() for _ in range(n)]
     for pair in pairs:
         await pair.start()
         if channelz_stub:
@@ -209,9 +209,9 @@ class ChannelzServicerTest(AioTestBase):
 
         k_success = 7
         k_failed = 9
-        for i in range(k_success):
+        for _ in range(k_success):
             await self._send_successful_unary_unary(pairs[0])
-        for i in range(k_failed):
+        for _ in range(k_failed):
             await self._send_failed_unary_unary(pairs[0])
         resp = await self._channelz_stub.GetChannel(
             channelz_pb2.GetChannelRequest(channel_id=pairs[0].channel_ref_id))
@@ -227,10 +227,10 @@ class ChannelzServicerTest(AioTestBase):
                                                    self._channelz_stub)
         k_success = 11
         k_failed = 13
-        for i in range(k_success):
+        for _ in range(k_success):
             await self._send_successful_unary_unary(pairs[0])
             await self._send_successful_unary_unary(pairs[2])
-        for i in range(k_failed):
+        for _ in range(k_failed):
             await self._send_failed_unary_unary(pairs[1])
             await self._send_failed_unary_unary(pairs[2])
 
@@ -270,10 +270,10 @@ class ChannelzServicerTest(AioTestBase):
                                                    self._channelz_stub)
         k_success = 17
         k_failed = 19
-        for i in range(k_success):
+        for _ in range(k_success):
             await self._send_successful_unary_unary(pairs[0])
             await self._send_successful_unary_unary(pairs[2])
-        for i in range(k_failed):
+        for _ in range(k_failed):
             await self._send_failed_unary_unary(pairs[1])
             await self._send_failed_unary_unary(pairs[2])
 
@@ -306,9 +306,9 @@ class ChannelzServicerTest(AioTestBase):
 
         k_success = 23
         k_failed = 29
-        for i in range(k_success):
+        for _ in range(k_success):
             await self._send_successful_unary_unary(pairs[0])
-        for i in range(k_failed):
+        for _ in range(k_failed):
             await self._send_failed_unary_unary(pairs[0])
 
         resp = await self._get_server_by_ref_id(pairs[0].server_ref_id)
@@ -324,10 +324,10 @@ class ChannelzServicerTest(AioTestBase):
                                                    self._channelz_stub)
         k_success = 3
         k_failed = 5
-        for i in range(k_success):
+        for _ in range(k_success):
             await self._send_successful_unary_unary(pairs[0])
             await self._send_successful_unary_unary(pairs[2])
-        for i in range(k_failed):
+        for _ in range(k_failed):
             await self._send_failed_unary_unary(pairs[1])
             await self._send_failed_unary_unary(pairs[2])
 

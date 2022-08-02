@@ -19,7 +19,7 @@ import os
 import sys
 import yaml
 
-os.chdir(os.path.dirname(sys.argv[0]) + '/../..')
+os.chdir(f'{os.path.dirname(sys.argv[0])}/../..')
 
 out = {}
 
@@ -35,7 +35,7 @@ try:
         regex = r'set\(\s*'
         regex += name
         regex += r'([^)]*)\)'
-        return [cmpath(x) for x in re.search(regex, cmake).group(1).split()]
+        return [cmpath(x) for x in re.search(regex, cmake)[1].split()]
 
     out['libs'] = [{
         'name':

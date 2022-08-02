@@ -44,7 +44,7 @@ class _LoggingInterceptor(aio.ServerInterceptor):
                                          Awaitable[grpc.RpcMethodHandler]],
             handler_call_details: grpc.HandlerCallDetails
     ) -> grpc.RpcMethodHandler:
-        self.record.append(self.tag + ':intercept_service')
+        self.record.append(f'{self.tag}:intercept_service')
         return await continuation(handler_call_details)
 
 

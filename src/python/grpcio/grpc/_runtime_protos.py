@@ -49,15 +49,14 @@ def _call_with_lazy_import(fn_name, protobuf_path):
     """
     if sys.version_info < _MINIMUM_VERSION:
         raise NotImplementedError(_VERSION_ERROR_TEMPLATE.format(fn_name))
+    if not _is_grpc_tools_importable():
+        raise NotImplementedError(_UNINSTALLED_TEMPLATE.format(fn_name))
+    import grpc_tools.protoc
+    if _has_runtime_proto_symbols(grpc_tools.protoc):
+        fn = getattr(grpc_tools.protoc, f'_{fn_name}')
+        return fn(protobuf_path)
     else:
-        if not _is_grpc_tools_importable():
-            raise NotImplementedError(_UNINSTALLED_TEMPLATE.format(fn_name))
-        import grpc_tools.protoc
-        if _has_runtime_proto_symbols(grpc_tools.protoc):
-            fn = getattr(grpc_tools.protoc, '_' + fn_name)
-            return fn(protobuf_path)
-        else:
-            raise NotImplementedError(_UNINSTALLED_TEMPLATE.format(fn_name))
+        raise NotImplementedError(_UNINSTALLED_TEMPLATE.format(fn_name))
 
 
 def protos(protobuf_path):  # pylint: disable=unused-argument

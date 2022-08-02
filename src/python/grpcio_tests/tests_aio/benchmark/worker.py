@@ -29,7 +29,7 @@ async def run_worker_server(port: int) -> None:
     worker_service_pb2_grpc.add_WorkerServiceServicer_to_server(
         servicer, server)
 
-    server.add_insecure_port('[::]:{}'.format(port))
+    server.add_insecure_port(f'[::]:{port}')
 
     await server.start()
 

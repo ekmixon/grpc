@@ -78,9 +78,6 @@ def handle_unary_stream(trigger, request, servicer_context):
 
 def handle_stream_unary(trigger, request_iterator, servicer_context):
     trigger.await_trigger()
-    # TODO(issue:#6891) We should be able to remove this loop
-    for request in request_iterator:
-        pass
     return _RESPONSE
 
 
@@ -152,9 +149,10 @@ class ResourceExhaustedTest(unittest.TestCase):
 
     def testUnaryUnary(self):
         multi_callable = self._channel.unary_unary(_UNARY_UNARY)
-        futures = []
-        for _ in range(test_constants.THREAD_CONCURRENCY):
-            futures.append(multi_callable.future(_REQUEST))
+        futures = [
+            multi_callable.future(_REQUEST)
+            for _ in range(test_constants.THREAD_CONCURRENCY)
+        ]
 
         self._trigger.await_calls()
 
@@ -177,9 +175,10 @@ class ResourceExhaustedTest(unittest.TestCase):
 
     def testUnaryStream(self):
         multi_callable = self._channel.unary_stream(_UNARY_STREAM)
-        calls = []
-        for _ in range(test_constants.THREAD_CONCURRENCY):
-            calls.append(multi_callable(_REQUEST))
+        calls = [
+            multi_callable(_REQUEST)
+            for _ in range(test_constants.THREAD_CONCURRENCY)
+        ]
 
         self._trigger.await_calls()
 
@@ -202,10 +201,11 @@ class ResourceExhaustedTest(unittest.TestCase):
 
     def testStreamUnary(self):
         multi_callable = self._channel.stream_unary(_STREAM_UNARY)
-        futures = []
         request = iter([_REQUEST] * test_constants.STREAM_LENGTH)
-        for _ in range(test_constants.THREAD_CONCURRENCY):
-            futures.append(multi_callable.future(request))
+        futures = [
+            multi_callable.future(request)
+            for _ in range(test_constants.THREAD_CONCURRENCY)
+        ]
 
         self._trigger.await_calls()
 
@@ -229,10 +229,11 @@ class ResourceExhaustedTest(unittest.TestCase):
 
     def testStreamStream(self):
         multi_callable = self._channel.stream_stream(_STREAM_STREAM)
-        calls = []
         request = iter([_REQUEST] * test_constants.STREAM_LENGTH)
-        for _ in range(test_constants.THREAD_CONCURRENCY):
-            calls.append(multi_callable(request))
+        calls = [
+            multi_callable(request)
+            for _ in range(test_constants.THREAD_CONCURRENCY)
+        ]
 
         self._trigger.await_calls()
 

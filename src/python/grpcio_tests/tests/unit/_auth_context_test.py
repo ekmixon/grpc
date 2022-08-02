@@ -93,9 +93,10 @@ class AuthContextTest(unittest.TestCase):
 
         channel_creds = grpc.ssl_channel_credentials(
             root_certificates=_TEST_ROOT_CERTIFICATES)
-        channel = grpc.secure_channel('localhost:{}'.format(port),
-                                      channel_creds,
-                                      options=_PROPERTY_OPTIONS)
+        channel = grpc.secure_channel(
+            f'localhost:{port}', channel_creds, options=_PROPERTY_OPTIONS
+        )
+
         response = channel.unary_unary(_UNARY_UNARY)(_REQUEST)
         channel.close()
         server.stop(None)
@@ -128,9 +129,10 @@ class AuthContextTest(unittest.TestCase):
             root_certificates=_TEST_ROOT_CERTIFICATES,
             private_key=_PRIVATE_KEY,
             certificate_chain=_CERTIFICATE_CHAIN)
-        channel = grpc.secure_channel('localhost:{}'.format(port),
-                                      channel_creds,
-                                      options=_PROPERTY_OPTIONS)
+        channel = grpc.secure_channel(
+            f'localhost:{port}', channel_creds, options=_PROPERTY_OPTIONS
+        )
+
 
         response = channel.unary_unary(_UNARY_UNARY)(_REQUEST)
         channel.close()
@@ -146,9 +148,10 @@ class AuthContextTest(unittest.TestCase):
 
     def _do_one_shot_client_rpc(self, channel_creds, channel_options, port,
                                 expect_ssl_session_reused):
-        channel = grpc.secure_channel('localhost:{}'.format(port),
-                                      channel_creds,
-                                      options=channel_options)
+        channel = grpc.secure_channel(
+            f'localhost:{port}', channel_creds, options=channel_options
+        )
+
         response = channel.unary_unary(_UNARY_UNARY)(_REQUEST)
         auth_data = pickle.loads(response)
         self.assertEqual(expect_ssl_session_reused,

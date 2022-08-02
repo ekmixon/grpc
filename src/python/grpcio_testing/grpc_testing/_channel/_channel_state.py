@@ -35,13 +35,11 @@ class State(_common.ChannelHandler):
         return rpc_state
 
     def take_rpc_state(self, method_descriptor):
-        method_full_rpc_name = '/{}/{}'.format(
-            method_descriptor.containing_service.full_name,
-            method_descriptor.name)
+        method_full_rpc_name = f'/{method_descriptor.containing_service.full_name}/{method_descriptor.name}'
+
         with self._condition:
             while True:
-                method_rpc_states = self._rpc_states[method_full_rpc_name]
-                if method_rpc_states:
+                if method_rpc_states := self._rpc_states[method_full_rpc_name]:
                     return method_rpc_states.pop(0)
                 else:
                     self._condition.wait()

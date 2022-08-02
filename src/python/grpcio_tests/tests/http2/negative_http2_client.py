@@ -24,8 +24,10 @@ from src.proto.grpc.testing import test_pb2_grpc
 
 def _validate_payload_type_and_length(response, expected_type, expected_length):
     if response.payload.type is not expected_type:
-        raise ValueError('expected payload type %s, got %s' %
-                         (expected_type, type(response.payload.type)))
+        raise ValueError(
+            f'expected payload type {expected_type}, got {type(response.payload.type)}'
+        )
+
     elif len(response.payload.body) != expected_length:
         raise ValueError('expected payload body size %d, got %d' %
                          (expected_length, len(response.payload.body)))
@@ -33,14 +35,12 @@ def _validate_payload_type_and_length(response, expected_type, expected_length):
 
 def _expect_status_code(call, expected_code):
     if call.code() != expected_code:
-        raise ValueError('expected code %s, got %s' %
-                         (expected_code, call.code()))
+        raise ValueError(f'expected code {expected_code}, got {call.code()}')
 
 
 def _expect_status_details(call, expected_details):
     if call.details() != expected_details:
-        raise ValueError('expected message %s, got %s' %
-                         (expected_details, call.details()))
+        raise ValueError(f'expected message {expected_details}, got {call.details()}')
 
 
 def _validate_status_code_and_details(call, expected_code, expected_details):
@@ -99,9 +99,7 @@ def _max_streams(stub):
                                       _RESPONSE_SIZE)
 
     # give the streams a workout
-    futures = []
-    for _ in range(15):
-        futures.append(stub.UnaryCall.future(_SIMPLE_REQUEST))
+    futures = [stub.UnaryCall.future(_SIMPLE_REQUEST) for _ in range(15)]
     for future in futures:
         _validate_payload_type_and_length(future.result(),
                                           messages_pb2.COMPRESSABLE,
@@ -122,7 +120,7 @@ def _run_test_case(test_case, stub):
     elif test_case == 'max_streams':
         _max_streams(stub)
     else:
-        raise ValueError("Invalid test case: %s" % test_case)
+        raise ValueError(f"Invalid test case: {test_case}")
 
 
 def _args():
@@ -143,7 +141,7 @@ def _args():
 
 
 def _stub(server_host, server_port):
-    target = '{}:{}'.format(server_host, server_port)
+    target = f'{server_host}:{server_port}'
     channel = grpc.insecure_channel(target)
     grpc.channel_ready_future(channel).result()
     return test_pb2_grpc.TestServiceStub(channel)

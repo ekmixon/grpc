@@ -83,8 +83,7 @@ def _stream_unary_handler(request_iterator, context):
 
 
 def _stream_stream_handler(request_iterator, context):
-    for request in request_iterator:
-        yield request
+    yield from request_iterator
 
 
 def _black_hole_handler(request, context):
@@ -154,16 +153,12 @@ class SimpleStubsTest(unittest.TestCase):
         initial_runs = []
         cached_runs = []
         for epoch in range(_CACHE_EPOCHS):
-            runs = []
             text = str(epoch)
-            for trial in range(_CACHE_TRIALS):
-                runs.append(_time_invocation(lambda: to_check(text)))
+            runs = [_time_invocation(lambda: to_check(text)) for _ in range(_CACHE_TRIALS)]
             initial_runs.append(runs[0])
             cached_runs.extend(runs[1:])
-        average_cold = sum((run for run in initial_runs),
-                           datetime.timedelta()) / len(initial_runs)
-        average_warm = sum((run for run in cached_runs),
-                           datetime.timedelta()) / len(cached_runs)
+        average_cold = (sum(initial_runs, datetime.timedelta()) / len(initial_runs))
+        average_warm = (sum(cached_runs, datetime.timedelta()) / len(cached_runs))
         self.assertLess(average_warm, average_cold)
 
     def assert_eventually(self,
@@ -179,7 +174,7 @@ class SimpleStubsTest(unittest.TestCase):
                 break
             time.sleep(0.5)
         else:
-            self.fail(message() + " after " + str(timeout))
+            self.fail(f"{message()} after {str(timeout)}")
 
     def test_unary_unary_insecure(self):
         with _server(None) as port:

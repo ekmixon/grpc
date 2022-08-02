@@ -41,14 +41,15 @@ def run():
             },
         }]
     })
-    options = []
-    # NOTE: the retry feature will be enabled by default >=v1.40.0
-    options.append(("grpc.enable_retries", 1))
-    options.append(("grpc.service_config", service_config_json))
+    options = [
+        ("grpc.enable_retries", 1),
+        ("grpc.service_config", service_config_json),
+    ]
+
     with grpc.insecure_channel('localhost:50051', options=options) as channel:
         stub = helloworld_pb2_grpc.GreeterStub(channel)
         response = stub.SayHello(helloworld_pb2.HelloRequest(name='you'))
-    print("Greeter client received: " + response.message)
+    print(f"Greeter client received: {response.message}")
 
 
 if __name__ == '__main__':

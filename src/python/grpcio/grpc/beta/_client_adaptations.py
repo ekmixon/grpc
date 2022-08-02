@@ -103,10 +103,7 @@ class _Rendezvous(future.Future, face.Call):
     def exception(self, timeout=None):
         try:
             rpc_error_call = self._future.exception(timeout=timeout)
-            if rpc_error_call is None:
-                return None
-            else:
-                return _abortion_error(rpc_error_call)
+            return None if rpc_error_call is None else _abortion_error(rpc_error_call)
         except grpc.FutureTimeoutError:
             raise future.TimeoutError()
         except grpc.FutureCancelledError:
@@ -178,18 +175,17 @@ def _blocking_unary_unary(channel, group, method, timeout, with_call,
             request_serializer=request_serializer,
             response_deserializer=response_deserializer)
         effective_metadata = _effective_metadata(metadata, metadata_transformer)
-        if with_call:
-            response, call = multi_callable.with_call(
-                request,
-                timeout=timeout,
-                metadata=_metadata.unbeta(effective_metadata),
-                credentials=_credentials(protocol_options))
-            return response, _Rendezvous(None, None, call)
-        else:
+        if not with_call:
             return multi_callable(request,
                                   timeout=timeout,
                                   metadata=_metadata.unbeta(effective_metadata),
                                   credentials=_credentials(protocol_options))
+        response, call = multi_callable.with_call(
+            request,
+            timeout=timeout,
+            metadata=_metadata.unbeta(effective_metadata),
+            credentials=_credentials(protocol_options))
+        return response, _Rendezvous(None, None, call)
     except grpc.RpcError as rpc_error_call:
         raise _abortion_error(rpc_error_call)
 
@@ -236,18 +232,17 @@ def _blocking_stream_unary(channel, group, method, timeout, with_call,
             request_serializer=request_serializer,
             response_deserializer=response_deserializer)
         effective_metadata = _effective_metadata(metadata, metadata_transformer)
-        if with_call:
-            response, call = multi_callable.with_call(
-                request_iterator,
-                timeout=timeout,
-                metadata=_metadata.unbeta(effective_metadata),
-                credentials=_credentials(protocol_options))
-            return response, _Rendezvous(None, None, call)
-        else:
+        if not with_call:
             return multi_callable(request_iterator,
                                   timeout=timeout,
                                   metadata=_metadata.unbeta(effective_metadata),
                                   credentials=_credentials(protocol_options))
+        response, call = multi_callable.with_call(
+            request_iterator,
+            timeout=timeout,
+            metadata=_metadata.unbeta(effective_metadata),
+            credentials=_credentials(protocol_options))
+        return response, _Rendezvous(None, None, call)
     except grpc.RpcError as rpc_error_call:
         raise _abortion_error(rpc_error_call)
 

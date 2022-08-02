@@ -145,8 +145,11 @@ class Runner(object):
         augmented_cases = [
             AugmentedCase(case, uuid.uuid4()) for case in filtered_cases
         ]
-        case_id_by_case = dict((augmented_case.case, augmented_case.id)
-                               for augmented_case in augmented_cases)
+        case_id_by_case = {
+            augmented_case.case: augmented_case.id
+            for augmented_case in augmented_cases
+        }
+
         result_out = moves.cStringIO()
         result = _result.TerminalResult(
             result_out, id_map=lambda case: case_id_by_case[case])

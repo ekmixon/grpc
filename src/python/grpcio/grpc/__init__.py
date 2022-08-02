@@ -2168,22 +2168,15 @@ __all__ = (
 ############################### Extension Shims ################################
 
 # Here to maintain backwards compatibility; avoid using these in new code!
-try:
+with contextlib.suppress(ImportError):
     import grpc_tools
     sys.modules.update({'grpc.tools': grpc_tools})
-except ImportError:
-    pass
-try:
+with contextlib.suppress(ImportError):
     import grpc_health
     sys.modules.update({'grpc.health': grpc_health})
-except ImportError:
-    pass
-try:
+with contextlib.suppress(ImportError):
     import grpc_reflection
     sys.modules.update({'grpc.reflection': grpc_reflection})
-except ImportError:
-    pass
-
 # Prevents import order issue in the case of renamed path.
 if sys.version_info >= (3, 6) and __name__ == "grpc":
     from grpc import aio  # pylint: disable=ungrouped-imports

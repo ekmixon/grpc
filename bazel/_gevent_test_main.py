@@ -30,7 +30,7 @@ class SingleLoader(object):
                 module = importer.find_module(module_name).load_module(module_name)
                 tests.append(loader.loadTestsFromModule(module))
         if len(tests) != 1:
-            raise AssertionError("Expected only 1 test module. Found {}".format(tests))
+            raise AssertionError(f"Expected only 1 test module. Found {tests}")
         self.suite.addTest(tests[0])
 
 

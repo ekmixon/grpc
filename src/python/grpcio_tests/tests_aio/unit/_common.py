@@ -115,7 +115,4 @@ class AdhocGenericHandler(grpc.GenericRpcHandler):
         self._handler = handler
 
     def service(self, handler_call_details):
-        if handler_call_details.method == ADHOC_METHOD:
-            return self._handler
-        else:
-            return None
+        return self._handler if handler_call_details.method == ADHOC_METHOD else None

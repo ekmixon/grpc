@@ -152,8 +152,7 @@ class CancelManyCallsTest(unittest.TestCase):
         server.register_completion_queue(server_completion_queue)
         port = server.add_http2_port(b'[::]:0')
         server.start()
-        channel = cygrpc.Channel('localhost:{}'.format(port).encode(), None,
-                                 None)
+        channel = cygrpc.Channel(f'localhost:{port}'.encode(), None, None)
 
         state = _State()
 
@@ -197,9 +196,10 @@ class CancelManyCallsTest(unittest.TestCase):
 
         with state.condition:
             while True:
-                if state.parked_handlers < test_constants.THREAD_CONCURRENCY:
-                    state.condition.wait()
-                elif state.handled_rpcs < test_constants.RPC_CONCURRENCY:
+                if (
+                    state.parked_handlers < test_constants.THREAD_CONCURRENCY
+                    or state.handled_rpcs < test_constants.RPC_CONCURRENCY
+                ):
                     state.condition.wait()
                 else:
                     state.handlers_released = True

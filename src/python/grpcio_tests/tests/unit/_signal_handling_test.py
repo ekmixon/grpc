@@ -128,7 +128,7 @@ class SignalHandlingTest(unittest.TestCase):
 
     def setUp(self):
         self._server = test_common.test_server()
-        self._port = self._server.add_insecure_port('{}:0'.format(_HOST))
+        self._port = self._server.add_insecure_port(f'{_HOST}:0')
         self._handler = _GenericHandler()
         self._server.add_generic_rpc_handlers((self._handler,))
         self._server.start()
@@ -139,7 +139,7 @@ class SignalHandlingTest(unittest.TestCase):
     @unittest.skipIf(os.name == 'nt', 'SIGINT not supported on windows')
     def testUnary(self):
         """Tests that the server unary code path does not stall signal handlers."""
-        server_target = '{}:{}'.format(_HOST, self._port)
+        server_target = f'{_HOST}:{self._port}'
         with tempfile.TemporaryFile(mode='r') as client_stdout:
             with tempfile.TemporaryFile(mode='r') as client_stderr:
                 client = _start_client((server_target, 'unary'), client_stdout,
@@ -154,7 +154,7 @@ class SignalHandlingTest(unittest.TestCase):
     @unittest.skipIf(os.name == 'nt', 'SIGINT not supported on windows')
     def testStreaming(self):
         """Tests that the server streaming code path does not stall signal handlers."""
-        server_target = '{}:{}'.format(_HOST, self._port)
+        server_target = f'{_HOST}:{self._port}'
         with tempfile.TemporaryFile(mode='r') as client_stdout:
             with tempfile.TemporaryFile(mode='r') as client_stderr:
                 client = _start_client((server_target, 'streaming'),
@@ -168,7 +168,7 @@ class SignalHandlingTest(unittest.TestCase):
 
     @unittest.skipIf(os.name == 'nt', 'SIGINT not supported on windows')
     def testUnaryWithException(self):
-        server_target = '{}:{}'.format(_HOST, self._port)
+        server_target = f'{_HOST}:{self._port}'
         with tempfile.TemporaryFile(mode='r') as client_stdout:
             with tempfile.TemporaryFile(mode='r') as client_stderr:
                 client = _start_client(('--exception', server_target, 'unary'),
@@ -180,7 +180,7 @@ class SignalHandlingTest(unittest.TestCase):
 
     @unittest.skipIf(os.name == 'nt', 'SIGINT not supported on windows')
     def testStreamingHandlerWithException(self):
-        server_target = '{}:{}'.format(_HOST, self._port)
+        server_target = f'{_HOST}:{self._port}'
         with tempfile.TemporaryFile(mode='r') as client_stdout:
             with tempfile.TemporaryFile(mode='r') as client_stderr:
                 client = _start_client(

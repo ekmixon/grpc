@@ -13,6 +13,7 @@
 # limitations under the License.
 """Invocation-side implementation of gRPC Asyncio Python."""
 
+
 import asyncio
 import sys
 from typing import Any, Iterable, List, Optional, Sequence
@@ -45,7 +46,7 @@ from ._typing import RequestIterableType
 from ._typing import SerializingFunction
 from ._utils import _timeout_to_deadline
 
-_USER_AGENT = 'grpc-python-asyncio/{}'.format(_grpcio_metadata.__version__)
+_USER_AGENT = f'grpc-python-asyncio/{_grpcio_metadata.__version__}'
 
 if sys.version_info[1] < 7:
 
@@ -128,20 +129,34 @@ class UnaryUnaryMultiCallable(_BaseMultiCallable,
     ) -> _base_call.UnaryUnaryCall:
 
         metadata = self._init_metadata(metadata, compression)
-        if not self._interceptors:
-            call = UnaryUnaryCall(request, _timeout_to_deadline(timeout),
-                                  metadata, credentials, wait_for_ready,
-                                  self._channel, self._method,
-                                  self._request_serializer,
-                                  self._response_deserializer, self._loop)
-        else:
-            call = InterceptedUnaryUnaryCall(
-                self._interceptors, request, timeout, metadata, credentials,
-                wait_for_ready, self._channel, self._method,
-                self._request_serializer, self._response_deserializer,
-                self._loop)
-
-        return call
+        return (
+            InterceptedUnaryUnaryCall(
+                self._interceptors,
+                request,
+                timeout,
+                metadata,
+                credentials,
+                wait_for_ready,
+                self._channel,
+                self._method,
+                self._request_serializer,
+                self._response_deserializer,
+                self._loop,
+            )
+            if self._interceptors
+            else UnaryUnaryCall(
+                request,
+                _timeout_to_deadline(timeout),
+                metadata,
+                credentials,
+                wait_for_ready,
+                self._channel,
+                self._method,
+                self._request_serializer,
+                self._response_deserializer,
+                self._loop,
+            )
+        )
 
 
 class UnaryStreamMultiCallable(_BaseMultiCallable,
@@ -161,19 +176,34 @@ class UnaryStreamMultiCallable(_BaseMultiCallable,
         metadata = self._init_metadata(metadata, compression)
         deadline = _timeout_to_deadline(timeout)
 
-        if not self._interceptors:
-            call = UnaryStreamCall(request, deadline, metadata, credentials,
-                                   wait_for_ready, self._channel, self._method,
-                                   self._request_serializer,
-                                   self._response_deserializer, self._loop)
-        else:
-            call = InterceptedUnaryStreamCall(
-                self._interceptors, request, deadline, metadata, credentials,
-                wait_for_ready, self._channel, self._method,
-                self._request_serializer, self._response_deserializer,
-                self._loop)
-
-        return call
+        return (
+            InterceptedUnaryStreamCall(
+                self._interceptors,
+                request,
+                deadline,
+                metadata,
+                credentials,
+                wait_for_ready,
+                self._channel,
+                self._method,
+                self._request_serializer,
+                self._response_deserializer,
+                self._loop,
+            )
+            if self._interceptors
+            else UnaryStreamCall(
+                request,
+                deadline,
+                metadata,
+                credentials,
+                wait_for_ready,
+                self._channel,
+                self._method,
+                self._request_serializer,
+                self._response_deserializer,
+                self._loop,
+            )
+        )
 
 
 class StreamUnaryMultiCallable(_BaseMultiCallable,
@@ -192,19 +222,34 @@ class StreamUnaryMultiCallable(_BaseMultiCallable,
         metadata = self._init_metadata(metadata, compression)
         deadline = _timeout_to_deadline(timeout)
 
-        if not self._interceptors:
-            call = StreamUnaryCall(request_iterator, deadline, metadata,
-                                   credentials, wait_for_ready, self._channel,
-                                   self._method, self._request_serializer,
-                                   self._response_deserializer, self._loop)
-        else:
-            call = InterceptedStreamUnaryCall(
-                self._interceptors, request_iterator, deadline, metadata,
-                credentials, wait_for_ready, self._channel, self._method,
-                self._request_serializer, self._response_deserializer,
-                self._loop)
-
-        return call
+        return (
+            InterceptedStreamUnaryCall(
+                self._interceptors,
+                request_iterator,
+                deadline,
+                metadata,
+                credentials,
+                wait_for_ready,
+                self._channel,
+                self._method,
+                self._request_serializer,
+                self._response_deserializer,
+                self._loop,
+            )
+            if self._interceptors
+            else StreamUnaryCall(
+                request_iterator,
+                deadline,
+                metadata,
+                credentials,
+                wait_for_ready,
+                self._channel,
+                self._method,
+                self._request_serializer,
+                self._response_deserializer,
+                self._loop,
+            )
+        )
 
 
 class StreamStreamMultiCallable(_BaseMultiCallable,
@@ -223,19 +268,34 @@ class StreamStreamMultiCallable(_BaseMultiCallable,
         metadata = self._init_metadata(metadata, compression)
         deadline = _timeout_to_deadline(timeout)
 
-        if not self._interceptors:
-            call = StreamStreamCall(request_iterator, deadline, metadata,
-                                    credentials, wait_for_ready, self._channel,
-                                    self._method, self._request_serializer,
-                                    self._response_deserializer, self._loop)
-        else:
-            call = InterceptedStreamStreamCall(
-                self._interceptors, request_iterator, deadline, metadata,
-                credentials, wait_for_ready, self._channel, self._method,
-                self._request_serializer, self._response_deserializer,
-                self._loop)
-
-        return call
+        return (
+            InterceptedStreamStreamCall(
+                self._interceptors,
+                request_iterator,
+                deadline,
+                metadata,
+                credentials,
+                wait_for_ready,
+                self._channel,
+                self._method,
+                self._request_serializer,
+                self._response_deserializer,
+                self._loop,
+            )
+            if self._interceptors
+            else StreamStreamCall(
+                request_iterator,
+                deadline,
+                metadata,
+                credentials,
+                wait_for_ready,
+                self._channel,
+                self._method,
+                self._request_serializer,
+                self._response_deserializer,
+                self._loop,
+            )
+        )
 
 
 class Channel(_base_channel.Channel):
@@ -278,11 +338,21 @@ class Channel(_base_channel.Channel):
                     self._stream_stream_interceptors.append(interceptor)
                 else:
                     raise ValueError(
-                        "Interceptor {} must be ".format(interceptor) +
-                        "{} or ".format(UnaryUnaryClientInterceptor.__name__) +
-                        "{} or ".format(UnaryStreamClientInterceptor.__name__) +
-                        "{} or ".format(StreamUnaryClientInterceptor.__name__) +
-                        "{}. ".format(StreamStreamClientInterceptor.__name__))
+                        (
+                            (
+                                (
+                                    (
+                                        f"Interceptor {interceptor} must be "
+                                        + f"{UnaryUnaryClientInterceptor.__name__} or "
+                                    )
+                                    + f"{UnaryStreamClientInterceptor.__name__} or "
+                                )
+                                + f"{StreamUnaryClientInterceptor.__name__} or "
+                            )
+                            + f"{StreamStreamClientInterceptor.__name__}. "
+                        )
+                    )
+
 
         self._loop = cygrpc.get_working_loop()
         self._channel = cygrpc.AioChannel(
@@ -336,8 +406,7 @@ class Channel(_base_channel.Channel):
 
             # Locate ones created by `aio.Call`.
             frame = stack[0]
-            candidate = frame.f_locals.get('self')
-            if candidate:
+            if candidate := frame.f_locals.get('self'):
                 if isinstance(candidate, _base_call.Call):
                     if hasattr(candidate, '_channel'):
                         # For intercepted Call object

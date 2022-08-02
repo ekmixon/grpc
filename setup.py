@@ -307,7 +307,7 @@ EXTENSION_INCLUDE_DIRECTORIES = ((PYTHON_STEM,) + CORE_INCLUDE + ABSL_INCLUDE +
 EXTENSION_LIBRARIES = ()
 if "linux" in sys.platform:
     EXTENSION_LIBRARIES += ('rt',)
-if not "win32" in sys.platform:
+if "win32" not in sys.platform:
     EXTENSION_LIBRARIES += ('m',)
 if "win32" in sys.platform:
     EXTENSION_LIBRARIES += (
@@ -335,9 +335,7 @@ asm_files = []
 # so we must apply quotes asymmetrically in order to yield the proper result in
 # the binary.
 def _quote_build_define(argument):
-    if "win32" in sys.platform:
-        return '"\\\"{}\\\""'.format(argument)
-    return '"{}"'.format(argument)
+    return f'"\\\"{argument}\\\""' if "win32" in sys.platform else f'"{argument}"'
 
 
 DEFINE_MACROS += (
@@ -348,8 +346,10 @@ DEFINE_MACROS += (
 
 asm_key = ''
 if BUILD_WITH_BORING_SSL_ASM and not BUILD_WITH_SYSTEM_OPENSSL:
-    boringssl_asm_platform = BUILD_OVERRIDE_BORING_SSL_ASM_PLATFORM if BUILD_OVERRIDE_BORING_SSL_ASM_PLATFORM else util.get_platform(
+    boringssl_asm_platform = (
+        BUILD_OVERRIDE_BORING_SSL_ASM_PLATFORM or util.get_platform()
     )
+
     LINUX_X86_64 = 'linux-x86_64'
     LINUX_ARM = 'linux-arm'
     LINUX_AARCH64 = 'linux-aarch64'
@@ -398,8 +398,10 @@ LDFLAGS = tuple(EXTRA_LINK_ARGS)
 CFLAGS = tuple(EXTRA_COMPILE_ARGS)
 if "linux" in sys.platform or "darwin" in sys.platform:
     pymodinit_type = 'PyObject*' if PY3 else 'void'
-    pymodinit = 'extern "C" __attribute__((visibility ("default"))) {}'.format(
-        pymodinit_type)
+    pymodinit = (
+        f'extern "C" __attribute__((visibility ("default"))) {pymodinit_type}'
+    )
+
     DEFINE_MACROS += (('PyMODINIT_FUNC', pymodinit),)
     DEFINE_MACROS += (('GRPC_POSIX_FORK_ALLOW_PTHREAD_ATFORK', 1),)
 
@@ -408,8 +410,7 @@ if "linux" in sys.platform or "darwin" in sys.platform:
 # We need OSX 10.10, the oldest which supports C++ thread_local.
 # Python 3.9: Mac OS Big Sur sysconfig.get_config_var('MACOSX_DEPLOYMENT_TARGET') returns int (11)
 if 'darwin' in sys.platform:
-    mac_target = sysconfig.get_config_var('MACOSX_DEPLOYMENT_TARGET')
-    if mac_target:
+    if mac_target := sysconfig.get_config_var('MACOSX_DEPLOYMENT_TARGET'):
         mac_target = pkg_resources.parse_version(str(mac_target))
         if mac_target < pkg_resources.parse_version('10.10.0'):
             os.environ['MACOSX_DEPLOYMENT_TARGET'] = '10.10'
@@ -425,12 +426,15 @@ def cython_extensions_and_necessity():
         for name in CYTHON_EXTENSION_MODULE_NAMES
     ]
     config = os.environ.get('CONFIG', 'opt')
-    prefix = 'libs/' + config + '/'
+    prefix = f'libs/{config}/'
     if USE_PREBUILT_GRPC_CORE:
         extra_objects = [
-            prefix + 'libares.a', prefix + 'libboringssl.a',
-            prefix + 'libgpr.a', prefix + 'libgrpc.a'
+            f'{prefix}libares.a',
+            f'{prefix}libboringssl.a',
+            f'{prefix}libgpr.a',
+            f'{prefix}libgrpc.a',
         ]
+
         core_c_files = []
     else:
         core_c_files = list(CORE_C_FILES)

@@ -120,8 +120,7 @@ class ReadSomeButNotAllResponsesTest(unittest.TestCase):
         server.register_completion_queue(server_completion_queue)
         port = server.add_http2_port(b'[::]:0')
         server.start()
-        channel = cygrpc.Channel('localhost:{}'.format(port).encode(), set(),
-                                 None)
+        channel = cygrpc.Channel(f'localhost:{port}'.encode(), set(), None)
 
         server_shutdown_tag = 'server_shutdown_tag'
         server_driver = _ServerDriver(server_completion_queue,
@@ -136,12 +135,13 @@ class ReadSomeButNotAllResponsesTest(unittest.TestCase):
         server_send_first_message_tag = 'server_send_first_message_tag'
         server_send_second_message_tag = 'server_send_second_message_tag'
         server_complete_rpc_tag = 'server_complete_rpc_tag'
-        server_call_due = set((
+        server_call_due = {
             server_send_initial_metadata_tag,
             server_send_first_message_tag,
             server_send_second_message_tag,
             server_complete_rpc_tag,
-        ))
+        }
+
         server_call_completion_queue = cygrpc.CompletionQueue()
         server_call_driver = _QueueDriver(server_call_condition,
                                           server_call_completion_queue,

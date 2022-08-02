@@ -74,7 +74,7 @@ STUB_FACTORY_IDENTIFIER = 'beta_create_TestService_stub'
 @contextlib.contextmanager
 def _system_path(path_insertion):
     old_system_path = sys.path[:]
-    sys.path = sys.path[0:1] + path_insertion + sys.path[1:]
+    sys.path = sys.path[:1] + path_insertion + sys.path[1:]
     yield
     sys.path = old_system_path
 
@@ -95,9 +95,9 @@ def _massage_proto_content(raw_proto_content):
     imports_substituted = raw_proto_content.replace(
         b'import "tests/protoc_plugin/protos/',
         b'import "beta_grpc_plugin_test/')
-    package_statement_substituted = imports_substituted.replace(
-        b'package grpc_protoc_plugin;', b'package beta_grpc_protoc_plugin;')
-    return package_statement_substituted
+    return imports_substituted.replace(
+        b'package grpc_protoc_plugin;', b'package beta_grpc_protoc_plugin;'
+    )
 
 
 def _packagify(directory):
@@ -157,9 +157,10 @@ class _ServicerMethods(object):
 
     def StreamingInputCall(self, request_iter, unused_rpc_context):
         response = self._responses_pb2.StreamingInputCallResponse()
-        aggregated_payload_size = 0
-        for request in request_iter:
-            aggregated_payload_size += len(request.payload.payload_compressable)
+        aggregated_payload_size = sum(
+            len(request.payload.payload_compressable) for request in request_iter
+        )
+
         response.aggregated_payload_size = aggregated_payload_size
         self._control()
         return response
@@ -182,8 +183,7 @@ class _ServicerMethods(object):
                 response.payload.payload_compressable = 'a' * parameter.size
                 self._control()
                 responses.append(response)
-        for response in responses:
-            yield response
+        yield from responses
 
 
 @contextlib.contextmanager
@@ -320,10 +320,11 @@ class PythonPluginTest(unittest.TestCase):
     def _protoc(self):
         args = [
             '',
-            '--proto_path={}'.format(self._proto_path),
-            '--python_out={}'.format(self._python_out),
-            '--grpc_python_out=grpc_1_0:{}'.format(self._python_out),
+            f'--proto_path={self._proto_path}',
+            f'--python_out={self._python_out}',
+            f'--grpc_python_out=grpc_1_0:{self._python_out}',
         ] + list(self._proto_file_names)
+
         protoc_exit_code = protoc.main(args)
         self.assertEqual(0, protoc_exit_code)
 

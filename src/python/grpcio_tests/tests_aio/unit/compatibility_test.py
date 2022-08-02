@@ -331,9 +331,8 @@ class TestCompatibility(AioTestBase):
 
         @grpc.stream_stream_rpc_method_handler
         def echo_stream_stream(request_iterator: Iterable[bytes],
-                               unused_context):
-            for request in request_iterator:
-                yield request
+                                   unused_context):
+            yield from request_iterator
 
         self._adhoc_handlers.set_adhoc_handler(echo_stream_stream)
         request_iterator = iter([_REQUEST] * _NUM_STREAM_RESPONSES)
@@ -346,9 +345,8 @@ class TestCompatibility(AioTestBase):
 
         @grpc.stream_stream_rpc_method_handler
         def echo_stream_stream(request_iterator: Iterable[bytes],
-                               unused_context):
-            for request in request_iterator:
-                yield request
+                                   unused_context):
+            yield from request_iterator
             raise RuntimeError('test')
 
         self._adhoc_handlers.set_adhoc_handler(echo_stream_stream)

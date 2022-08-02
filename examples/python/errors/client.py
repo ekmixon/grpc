@@ -35,12 +35,11 @@ def process(stub):
         _LOGGER.error('Call failure: %s', rpc_error)
         status = rpc_status.from_call(rpc_error)
         for detail in status.details:
-            if detail.Is(error_details_pb2.QuotaFailure.DESCRIPTOR):
-                info = error_details_pb2.QuotaFailure()
-                detail.Unpack(info)
-                _LOGGER.error('Quota failure: %s', info)
-            else:
-                raise RuntimeError('Unexpected failure: %s' % detail)
+            if not detail.Is(error_details_pb2.QuotaFailure.DESCRIPTOR):
+                raise RuntimeError(f'Unexpected failure: {detail}')
+            info = error_details_pb2.QuotaFailure()
+            detail.Unpack(info)
+            _LOGGER.error('Quota failure: %s', info)
 
 
 def main():

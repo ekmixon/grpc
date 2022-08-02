@@ -306,11 +306,10 @@ class InterceptedCall:
         except (AioRpcError, asyncio.CancelledError):
             call_completed = True
 
-        if call_completed:
-            for callback in self._pending_add_done_callbacks:
+        for callback in self._pending_add_done_callbacks:
+            if call_completed:
                 callback(self)
-        else:
-            for callback in self._pending_add_done_callbacks:
+            else:
                 callback = functools.partial(self._wrap_add_done_callback,
                                              callback)
                 call.add_done_callback(callback)
@@ -440,8 +439,7 @@ class _InterceptedUnaryResponseMixin:
 
     def __await__(self):
         call = yield from self._interceptors_task.__await__()
-        response = yield from call.__await__()
-        return response
+        return (yield from call.__await__())
 
 
 class _InterceptedStreamResponseMixin:
@@ -910,10 +908,6 @@ class UnaryUnaryCallResponse(_base_call.UnaryUnaryCall):
         return None
 
     def __await__(self):
-        if False:  # pylint: disable=using-constant-test
-            # This code path is never used, but a yield statement is needed
-            # for telling the interpreter that __await__ is a generator.
-            yield None
         return self._response
 
     async def wait_for_connection(self) -> None:

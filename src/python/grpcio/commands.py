@@ -13,6 +13,7 @@
 # limitations under the License.
 """Provides distutils command classes for the GRPC Python setup process."""
 
+
 from __future__ import print_function
 
 import distutils
@@ -36,7 +37,7 @@ from setuptools.command import test
 import support
 
 PYTHON_STEM = os.path.dirname(os.path.abspath(__file__))
-GRPC_STEM = os.path.abspath(PYTHON_STEM + '../../../../')
+GRPC_STEM = os.path.abspath(f'{PYTHON_STEM}../../../../')
 PROTO_STEM = os.path.join(GRPC_STEM, 'src', 'proto')
 PROTO_GEN_STEM = os.path.join(GRPC_STEM, 'src', 'python', 'gens')
 CYTHON_STEM = os.path.join(PYTHON_STEM, 'grpc', '_cython')
@@ -68,16 +69,20 @@ def _get_grpc_custom_bdist(decorated_basename, target_bdist_basename):
         url = BINARIES_REPOSITORY + '/{target}'.format(target=decorated_path)
         bdist_data = request.urlopen(url).read()
     except IOError as error:
-        raise CommandError('{}\n\nCould not find the bdist {}: {}'.format(
-            traceback.format_exc(), decorated_path, error.message))
+        raise CommandError(
+            f'{traceback.format_exc()}\n\nCould not find the bdist {decorated_path}: {error.message}'
+        )
+
     # Our chosen local bdist path.
     bdist_path = target_bdist_basename + GRPC_CUSTOM_BDIST_EXT
     try:
         with open(bdist_path, 'w') as bdist_file:
             bdist_file.write(bdist_data)
     except IOError as error:
-        raise CommandError('{}\n\nCould not write grpcio bdist: {}'.format(
-            traceback.format_exc(), error.message))
+        raise CommandError(
+            f'{traceback.format_exc()}\n\nCould not write grpcio bdist: {error.message}'
+        )
+
     return bdist_path
 
 
@@ -120,9 +125,8 @@ class BuildProjectMetadata(setuptools.Command):
 
     def run(self):
         with open(os.path.join(PYTHON_STEM, 'grpc/_grpcio_metadata.py'),
-                  'w') as module_file:
-            module_file.write('__version__ = """{}"""'.format(
-                self.distribution.get_version()))
+                      'w') as module_file:
+            module_file.write(f'__version__ = """{self.distribution.get_version()}"""')
 
 
 class BuildPy(build_py.build_py):
@@ -137,7 +141,7 @@ def _poison_extensions(extensions, message):
     """Includes a file that will always fail to compile in all extensions."""
     poison_filename = os.path.join(PYTHON_STEM, 'poison.c')
     with open(poison_filename, 'w') as poison:
-        poison.write('#error {}'.format(message))
+        poison.write(f'#error {message}')
     for extension in extensions:
         extension.sources = [poison_filename]
 
@@ -151,11 +155,17 @@ def check_and_update_cythonization(extensions):
         for source in extension.sources:
             base, file_ext = os.path.splitext(source)
             if file_ext == '.pyx':
-                generated_pyx_source = next((base + gen_ext for gen_ext in (
-                    '.c',
-                    '.cpp',
-                ) if os.path.isfile(base + gen_ext)), None)
-                if generated_pyx_source:
+                if generated_pyx_source := next(
+                    (
+                        base + gen_ext
+                        for gen_ext in (
+                            '.c',
+                            '.cpp',
+                        )
+                        if os.path.isfile(base + gen_ext)
+                    ),
+                    None,
+                ):
                     generated_pyx_sources.append(generated_pyx_source)
                 else:
                     sys.stderr.write('Cython-generated files are missing...\n')
@@ -238,7 +248,7 @@ class BuildExt(build_ext.build_ext):
                                            stdout=subprocess.PIPE,
                                            stderr=subprocess.PIPE)
                 _, cc_err = cc_test.communicate(input=b'int main(){return 0;}')
-                return not 'invalid argument' in str(cc_err)
+                return 'invalid argument' not in str(cc_err)
             except:
                 sys.stderr.write('Non-fatal exception:' +
                                  traceback.format_exc() + '\n')
@@ -258,13 +268,9 @@ class BuildExt(build_ext.build_ext):
 
             def new_compile(obj, src, ext, cc_args, extra_postargs, pp_opts):
                 if src.endswith('.c'):
-                    extra_postargs = [
-                        arg for arg in extra_postargs if not '-std=c++' in arg
-                    ]
+                    extra_postargs = [arg for arg in extra_postargs if '-std=c++' not in arg]
                 elif src.endswith('.cc') or src.endswith('.cpp'):
-                    extra_postargs = [
-                        arg for arg in extra_postargs if not '-std=gnu99' in arg
-                    ]
+                    extra_postargs = [arg for arg in extra_postargs if '-std=gnu99' not in arg]
                 return old_compile(obj, src, ext, cc_args, extra_postargs,
                                    pp_opts)
 
@@ -346,9 +352,8 @@ class Clean(setuptools.Command):
             abs_paths = glob.glob(this_glob)
             for path in abs_paths:
                 if not str(path).startswith(Clean._CURRENT_DIRECTORY):
-                    raise ValueError(
-                        "Cowardly refusing to delete {}.".format(path))
-                print("Removing {}".format(os.path.relpath(path)))
+                    raise ValueError(f"Cowardly refusing to delete {path}.")
+                print(f"Removing {os.path.relpath(path)}")
                 if os.path.isfile(path):
                     os.remove(str(path))
                 else:
